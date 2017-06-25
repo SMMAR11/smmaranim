@@ -1,0 +1,24 @@
+{% extends 'pdf_template.html' %}
+{% block content %}
+<div class="pdf-attributes-wrapper">
+	<div class="pdf-title-1">{{ title }}</div>
+	<div class="pdf-title-2">Données générales de la réservation</div>
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ attrs_reserv.util }}</div>
+		<div class="pdf-col-6">{{ attrs_reserv.org }}</div>
+	</div>
+	{{ attrs_reserv.outil }}
+	{{ attrs_reserv.dt_reserv }}
+	<div class="pdf-title-2">Contact référent de la réservation</div>
+	{{ attrs_reserv.nom_complet_refer_reserv }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ attrs_reserv.courr_refer_reserv }}</div>
+		<div class="pdf-col-6">{{ attrs_reserv.tel_refer_reserv }}</div>
+	</div>
+	<div class="pdf-title-2">Aides proposées par le SMMAR</div>
+	<span class="pdf-important">{{ aides_smmar }}</span>
+	{{ attrs_reserv.aides }}
+	<div class="pdf-title-2">Données complémentaires de la réservation</div>
+	{{ attrs_reserv.comm_reserv }}
+</div>
+{% endblock content %}

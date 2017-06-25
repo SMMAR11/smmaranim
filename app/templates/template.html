@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="author" content="SMMAR">
+		<meta name="rights" content="SMMAR">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{ app_name }} - {{ title }}</title>
+		{{ head_includes | safe }}
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row" id="header">
+				<nav class="navbar">
+					<div class="navbar-header">
+						{% if connected_user %}
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						{% endif %}
+						<a class="navbar-brand" href="{% url 'index' %}" title="Revenir sur la page principale">
+							<img src="{% static './images/logos/smmaranim.png' %}">
+						</a>
+					</div>
+					{% if connected_user %}
+					<div id="navbar" class="collapse navbar-collapse">
+						<div class="hidden-lg hidden-md">{{ top_menu | safe }}</div>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a href="#"><span class="alert-badge" style="{{ badge_color }}"></span></a></li>
+							<li class="dropdown">
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									<span class="fa fa-lg fa-user-o"></span>
+									{{ connected_user.get_nom_complet }}
+									<span class="caret"></span>
+								</a>
+								<ul class="dropdown-menu">
+									<li><a href="#">Consulter mon compte</a></li>
+									{% if connected_user.get_is_superadmin %}
+									<li><a href="/admin/">Accéder au site d'administration de {{ app_name }}</a></li>
+									{% endif %}
+									{% if connected_user.get_est_superadmin == 0 %}
+									<li><span action="{% url 'index' %}?action=activer-mode-super-administrateur" modal-suffix="ger_mode_superadmin" onclick="ajax(event);">Activer le mode super-administrateur</span></li>
+									{% endif %}
+									{% if connected_user.get_est_superadmin == 1 %}
+									<li><span action="{% url 'index' %}?action=desactiver-mode-super-administrateur" modal-suffix="ger_mode_superadmin" onclick="ajax(event);">Désactiver le mode super-administrateur</span></li>
+									{% endif %}
+									<li><span action="{% url 'index' %}?action=logout" onclick="ajax(event);" modal-suffix="logout">Se déconnecter</span></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+					{% endif %}
+				</nav>
+			</div>
+			<div id="content" class="form-root">
+				{% if connected_user %}
+				<div class="row">
+					<div class="col-md-3 visible-lg visible-md">{{ side_menu | safe }}</div>
+					<div class="col-md-9">
+				{% endif %}
+				{% block content %}{% endblock %}
+				{% if connected_user %}
+					</div>
+				</div>
+				{% endif %}
+			</div>
+			<div class="row" id="footer">
+				<img src="{% static './images/logos/smmar.png' %}">
+			</div>
+			{{ permanent_modals }}
+			{% for modal in modals %}{{ modal }}{% endfor %}
+		</div>
+		{{ body_includes | safe }}
+		{% if can_access == False %}
+		<script type="text/javascript">
+			$('.forbidden').hide();
+		</script>
+		{% endif %}
+	</body>
+</html>

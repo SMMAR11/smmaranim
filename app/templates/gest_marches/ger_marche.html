@@ -1,0 +1,22 @@
+{% extends 'template.html' %}
+{% block content %}
+{% if m %}
+<div style="text-align: right;">
+	<a href="{% url 'consult_marche' m.get_pk %}" class="icon-with-text previous-icon">Revenir au marché</a>
+</div>
+{% endif %}
+<div class="custom-form panel">
+	<div class="panel-heading">{{ title }}</div>
+	<div class="panel-body">
+		<form action="" method="post" name="form_ger_marche" onsubmit="ajax(event);">
+			{% csrf_token %}
+			{{ form_ger_marche.int_marche }}
+			<div class="row">
+				<div class="col-sm-6">{{ form_ger_marche.zd_dt_deb_marche }}</div>
+				<div class="col-sm-6">{{ form_ger_marche.zd_dt_fin_marche }}</div>
+			</div>
+			<button class="center-block custom-button main-button" type="submit">Valider</button>
+		</form>
+	</div>
+</div>
+{% endblock content %}

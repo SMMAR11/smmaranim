@@ -1,0 +1,15 @@
+.custom-well {
+	border: double 1px #FFF;
+	color: #FFF;
+	margin-bottom: 20px;
+	padding: 5px 15px;
+	text-align: center;
+}
+
+.custom-well.main-well {
+	background-color: #94C054;
+}
+
+.custom-well.alt-well {
+	background-color: #F8B862;
+}

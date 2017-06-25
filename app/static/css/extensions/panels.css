@@ -1,0 +1,60 @@
+#side-menu.panel-group {
+	margin: 0;
+}
+
+#side-menu.panel-group > .panel:not(:last-child) {
+	margin-bottom: 5px;
+}
+
+#side-menu > .panel {
+	border: solid 1px #DDD;
+	border-radius: 0;
+	margin: 0;
+}
+
+#side-menu > .panel > .panel-heading {
+	background-color: #3770B1;
+	border: none;
+	border-radius: 0;
+	color: #FFF;
+	padding: 5px;
+}
+
+#side-menu > .panel > .panel-heading > .panel-title > a > img {
+	height: 30px;
+	margin-right: 2.5px;
+}
+
+#side-menu > .panel > .panel-heading > .panel-title > a {
+	color: #FFF;
+	display: block;
+	line-height: 30px;
+	text-decoration: none;
+}
+
+#side-menu.panel-group > .panel > .panel-heading + .panel-collapse > .panel-body {
+	border-top: solid 1px #DDD;
+}
+
+#side-menu .panel-body {
+	padding: 0;
+}
+
+#side-menu .panel-body > table {
+	width: 100%;
+}
+
+#side-menu .panel-body > table > tbody > tr:not(:first-child) {
+	border-top: solid 1px #DDD;
+}
+
+#side-menu .panel-body > table > tbody > tr > td > a {
+	color: #555;
+	display: block;
+	padding: 5px;
+	text-decoration: none;
+}
+
+#side-menu .panel-body > table > tbody > tr > td > a:hover {
+	background-color: #F6F6F6;
+}

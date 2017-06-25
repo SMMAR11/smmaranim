@@ -1,0 +1,78 @@
+{% extends 'template.html' %}
+{% block content %}
+<div style="text-align: right;">
+	<a href="{% url 'chois_projet' %}" class="icon-with-text previous-icon">Revenir à la liste des projets</a>
+</div>
+<div class="custom-well main-well">{{ title }}</div>
+<div class="row">
+	<div class="col-sm-9">
+{% if ongl_cep__show == True %}
+		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
+			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
+			<li><a href="#ongl_cep" data-toggle="tab">Classes</a></li>
+		</ul>
+		<div class="tab-content">
+			<div id="ongl_caract" class="active fade in tab-pane">
+{% endif %}
+				<div class="attributes-wrapper">
+					{{ attrs_projet.org }}
+					{{ attrs_projet.marche }}
+					{{ attrs_projet.int_projet }}
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_projet.type_interv }}</div>
+						<div class="col-sm-6">{{ attrs_projet.sti }}</div>
+					</div>
+					{{ attrs_projet.type_public }}
+					{{ attrs_projet.comm_projet }}
+				</div>
+{% if ongl_cep__show == True %}
+			</div>
+			<div id="ongl_cep" class="fade tab-pane">
+				<div class="forbidden" style="text-align: right;">
+					<span class="add-icon icon-with-text" data-target="#fm_ajout_cep" data-toggle="modal">Ajouter une classe</span>
+				</div>
+				<div class="custom-table" id="dtable_consult_cep">
+					<table border="1" bordercolor="#DDD">
+						<thead>
+							<tr>
+								<th>Classe</th>
+								<th>Établissement scolaire</th>
+								<th>Contact référent</th>
+								<th></th>
+								<th class="forbidden"></th>
+								<th class="forbidden"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for cep in p.get_cep.all %}
+							<tr>
+								<td>{{ cep.get_classe }}</td>
+								<td>{{ cep.get_ecole }}</td>
+								<td>{{ cep.get_nom_complet }}</td>
+								<td>
+									<span action="?action=consulter-classe-ecole-projet&id={{ cep.get_pk }}" class="icon-without-text inform-icon" modal-suffix="consult_cep" onclick="ajax(event);" title="Consulter la classe"></span>
+								</td>
+								<td class="forbidden">
+									<span action="?action=initialiser-formulaire-modification-classe-ecole-projet&id={{ cep.get_pk }}" class="icon-without-text modify-icon" modal-suffix="modif_cep" onclick="ajax(event);" title="Modifier la classe"></span>
+								</td>
+								<td class="forbidden">
+									<span action="?action=supprimer-classe-ecole-projet-etape-1&id={{ cep.get_pk }}" class="delete-icon icon-without-text" modal-suffix="suppr_cep" onclick="ajax(event);" title="Supprimer la classe"></span>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+{% endif %}
+	</div>
+	<div class="col-sm-3">
+		<div class="forbidden">
+			<a href="{% url 'modif_projet' %}?id={{ p.get_pk }}" class="icon-with-text modify-icon">Modifier le projet</a>
+			<div class="br"></div>
+		</div>
+		<a href="?action=imprimer-projet" class="icon-with-text print-icon" target="blank">Imprimer le projet</a>
+	</div>
+</div>
+{% endblock content %}

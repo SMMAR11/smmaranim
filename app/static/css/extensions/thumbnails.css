@@ -1,0 +1,46 @@
+.custom-thumbnail {
+	background-color: #FFF;
+	border: 1px solid #DDD;
+	display: block;
+	padding: 10px 15px;
+	text-align: center;
+}
+
+.custom-thumbnail:hover {
+	border-color: #2C5A8E;
+	-o-transition: border .2s ease-in-out;
+	transition: border .2s ease-in-out;
+	-webkit-transition: border .2s ease-in-out;
+}
+
+.custom-thumbnail,
+.custom-thumbnail:hover,
+.custom-thumbnail:focus {
+	color: #555;
+	text-decoration: none;
+}
+
+.custom-thumbnail > img {
+	max-height: 120px;
+	margin-bottom: 10px;
+}
+
+@media (min-width: 768px) {
+	.thumbnails-row > div:not(:last-child) {
+		margin-bottom: 20px;
+	}
+}
+
+@media (max-width: 767px) {
+	.thumbnails-row > div > div {
+		margin-bottom: 20px;
+	}
+
+	.thumbnails-row {
+		margin-bottom: -20px;
+	}
+}
+
+.custom-thumbnail[href="#"] {
+	opacity: 0.5;
+}

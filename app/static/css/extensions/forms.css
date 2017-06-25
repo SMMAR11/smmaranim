@@ -1,0 +1,77 @@
+.custom-form {
+	margin: 0;
+	background-color: transparent;
+	border: solid 2px #3770B1;
+	border-radius: 5px;
+}
+
+.custom-form .panel-heading {
+	background-color: #3770B1;
+	border: none;
+	border-radius: 0;
+	color: #FFF;
+	padding: 5px 15px;
+	text-align: center;
+}
+
+.custom-form .panel-body {
+	padding: 20px 15px;
+}
+
+.custom-form .panel-body.has-pf {
+	padding: 0 15px 20px 15px;
+}
+
+.custom-form .panel-fieldset {
+	background-color: #3770B1;
+	color: #FFF;
+	margin-bottom: 20px;
+	padding: 5px 15px;
+}
+
+.panel-body ~ .panel-fieldset {
+	padding: 0px;
+}
+
+.required-field:before {
+	color: #FF0921;
+	content: ' (requis)';
+	font-size: 12px;
+	font-style: italic;
+}
+
+.field-wrapper .field .invalid-field {
+	border: solid 1px #FF0921;
+	box-shadow : 0 0 5px rgba(255, 9, 33, 0.8);
+	-webkit-box-shadow : 0 0 5px rgba(255, 9, 33, 0.8);
+}
+
+.field-wrapper .field-error-message > ul {
+	font-weight : bold;
+	list-style : none; 
+	padding-left: 0;
+}
+
+.field-wrapper .field-error-message > ul > li {
+	font-size : 12px;
+	position: absolute;
+	bottom: -15px;
+	color : #FF0921;
+}
+
+.form-global-error {
+	background-color: #FFCDD2;
+	border-bottom: solid 1px;
+	border-top: solid 1px;
+	border-color: #FF0921;
+	color: #FF0921;
+	margin-bottom: 20px;
+	margin-top: -20px;
+	padding: 5px 15px;
+}
+
+.valid-form {
+	color: #82C46C;
+	font-weight: bold;
+	text-align: center;
+}

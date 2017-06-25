@@ -1,0 +1,13 @@
+{% extends 'template.html' %}
+{% block content %}
+<div class="custom-well main-well">{{ title }}</div>
+<form action="" method="post" name="form_filtr_reserv" onsubmit="ajax(event);">
+	{% csrf_token %}
+	{{ form_filtr_reserv.zl_outil }}
+	<div class="row">
+		<div class="col-sm-6">{{ form_filtr_reserv.zl_mois }}</div>
+		<div class="col-sm-6">{{ form_filtr_reserv.zl_annee }}</div>
+	</div>
+</form>
+{{ cal_filtr_reserv | safe }}
+{% endblock content %}

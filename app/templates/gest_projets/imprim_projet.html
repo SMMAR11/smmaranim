@@ -1,0 +1,17 @@
+{% extends 'pdf_template.html' %}
+{% block content %}
+<div class="pdf-attributes-wrapper">
+	<div class="pdf-title-1">{{ title }}</div>
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ attrs_projet.org }}</div>
+		<div class="pdf-col-6">{{ attrs_projet.marche }}</div>
+	</div>
+	{{ attrs_projet.int_projet }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ attrs_projet.type_interv }}</div>
+		<div class="pdf-col-6">{{ attrs_projet.sti }}</div>
+	</div>
+	{{ attrs_projet.type_public }}
+	{{ attrs_projet.comm_projet }}
+</div>
+{% endblock content %}

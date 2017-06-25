@@ -1,0 +1,66 @@
+.datepicker {
+	border-radius: 0;
+	padding: 0 7.5px;
+	width: 200px;
+	height: 200px;
+	line-height: 200px;
+}
+
+.datepicker .table-condensed {
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 1.3;
+	width: 100%;
+}
+
+.datepicker .table-condensed th,
+.datepicker .table-condensed td {
+	width: 1%;
+	padding: 0;
+	font-size: 12px;
+}
+
+.datepicker .table-condensed th,
+.datepicker .table-condensed td,
+.datepicker .table-condensed td span {
+	border-radius: 0;
+}
+
+.datepicker .table-condensed td span {
+	width: 22.5%;
+	height: 42.5px;
+	line-height: 42.5px;
+}
+
+.datepicker table tr td.old,
+.datepicker table tr td.new,
+.datepicker table tr td span.old,
+.datepicker table tr td span.new {
+	color: #DDD;
+}
+
+.datepicker .datepicker-switch:hover,
+.datepicker .next:hover,
+.datepicker .prev:hover,
+.datepicker table tr td.day:hover,
+.datepicker table tr td.day.focused,
+.datepicker tfoot tr th:hover {
+	background: #F6F6F6;
+}
+
+.datepicker table tr td.active,
+.datepicker table tr td.active:hover,
+.datepicker table tr td span.active,
+.datepicker table tr td span.active:hover {
+	background-color: transparent;
+	background-image: none;
+	color: #FFF;
+	text-shadow: none;
+}
+
+.datepicker table tr td.active.active,
+.datepicker table tr td.active:hover.active,
+.datepicker table tr td span.active.active,
+.datepicker table tr td span.active:hover.active {
+	background-color: #3770B1;
+}

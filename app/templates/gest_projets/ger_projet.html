@@ -1,0 +1,25 @@
+{% extends 'template.html' %}
+{% block content %}
+{% if p %}
+<div style="text-align: right;">
+	<a href="{% url 'consult_projet' p.get_pk %}" class="icon-with-text previous-icon">Revenir au projet</a>
+</div>
+{% endif %}
+<div class="custom-form panel">
+	<div class="panel-heading">{{ title }}</div>
+	<div class="panel-body">
+		{% if message__show == True %}
+		<span class="important">Attention, si vous changez le type de public visé, alors les classes précédemment ajoutées seront supprimées.</span>
+		{% endif %}
+		<form action="" method="post" name="form_ger_projet" onsubmit="ajax(event);">
+			{% csrf_token %}
+			{{ form_ger_projet.zl_pm }}
+			{{ form_ger_projet.int_projet }}
+			{{ form_ger_projet.zl_sti }}
+			{{ form_ger_projet.id_type_public }}
+			{{ form_ger_projet.comm_projet }}
+			<button class="center-block custom-button main-button" type="submit">Valider</button>
+		</form>
+	</div>
+</div>
+{% endblock content %}

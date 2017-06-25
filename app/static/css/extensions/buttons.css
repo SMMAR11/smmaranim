@@ -1,0 +1,25 @@
+.custom-button {
+	border: none;
+	border-radius: 5px;
+	color: #FFF;
+	display: block;
+	padding: 2.5px 7.5px;
+}
+
+a.custom-button {
+	display: inline-block;
+}
+
+.custom-button:hover,
+.custom-button:focus {
+	color: #FFF;
+	text-decoration: none;
+}
+
+.main-button {
+	background-color: #94C054;
+}
+
+.main-button:hover {
+	background-color: #779A44;
+}

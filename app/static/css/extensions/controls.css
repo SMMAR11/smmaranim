@@ -1,0 +1,73 @@
+.attribute-wrapper,
+.field-wrapper {
+	margin-bottom: 20px;
+	position: relative;
+}
+
+.attribute-wrapper .attribute-label,
+.field-wrapper .field-label {
+	color: #3770B1;
+}
+
+.field-wrapper .field-label .fl-complement {
+	color: #FF0921;
+	font-size: 12px;
+	font-style: italic;
+}
+
+.attribute-wrapper .attribute,
+.field-wrapper .field > input[type="password"],
+.field-wrapper .field input[type="text"],
+.field-wrapper .field > select,
+.field-wrapper .field > textarea {
+	background-color: #FFF;
+	border: solid 1px #DDD;
+	border-radius: 0;
+	color: #555;
+	display: block;
+	font-size: 16px;
+	min-height: 25px;
+	padding: 0 5px;
+	width: 100%;
+}
+
+.field-wrapper .field > textarea {
+	height: 25px;
+	resize: vertical;
+}
+
+.field-wrapper .field > ul {
+	border: none;
+	box-shadow: none;
+	list-style: none;
+	padding-left: 0;
+}
+
+.field-wrapper .field > ul > li {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+.field-wrapper .field > ul > li > label {
+	color: #555;
+	font-weight: normal;
+	margin: 0;
+}
+
+.attribute-wrapper .attribute,
+.field-wrapper .field input[readonly] {
+	background-color: #F6F6F6;
+}
+
+.input-group-addon {
+	background-color: #F6F6F6;
+	border: solid 1px #DDD;
+	border-radius: 0;
+	font-size: 12px;
+	line-height: 1.3;
+	padding: 0 7.5px;
+}
+
+.attributes-wrapper {
+	margin-bottom: -20px;
+}

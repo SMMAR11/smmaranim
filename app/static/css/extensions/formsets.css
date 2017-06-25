@@ -1,0 +1,12 @@
+.formsets-wrapper {
+	margin-bottom: 20px;
+}
+
+.formsets-wrapper .formset-label {
+	color: #3770B1;
+}
+
+.add-form {
+	cursor: pointer;
+	font-size: 20px;
+}

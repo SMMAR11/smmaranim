@@ -1,0 +1,191 @@
+/* Badges */
+.alert-badge {
+	background-color: #F8B862;
+	border-radius: 100%;
+	display: inline-block;
+	height: 15px;
+	vertical-align: middle;
+	width: 15px;
+}
+
+/* Boutons images */
+.add-icon {
+	background: url('../images/icons/add.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.delete-icon {
+	background: url('../images/icons/delete.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.half-icon {
+	background: url('../images/icons/half.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.help-icon {
+	background: url('../images/icons/help.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: inline-block;
+	height: 19.5px;
+	margin-left: 2.5px;
+	width: 19.5px;
+	position: absolute;
+	top: 0;
+}
+
+.inform-icon {
+	background: url('../images/icons/inform.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.modify-icon {
+	background: url('../images/icons/modify.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.previous-icon {
+	background: url('../images/icons/previous.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.print-icon {
+	background: url('../images/icons/print.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.icon-with-text {
+	color: #555;
+	display: inline;
+	padding-left: 22.5px;
+}
+
+.icon-with-text:hover,
+.icon-with-text:focus {
+	color: #555;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.icon-without-text {
+	cursor: pointer;
+}
+
+/* Calendriers */
+.month-calendar {
+	overflow: auto;
+}
+
+.month-calendar > table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.month-calendar > table > thead {
+	background-color: #3770B1;
+	color: #FFF;
+}
+
+.month-calendar > table > thead > tr > th {
+	border: none;
+	font-size: 12px;
+	font-weight: normal;
+	padding: 2.5px;
+	text-align: center;
+}
+
+.month-calendar > table > tbody > tr > td {
+	font-size: 12px;
+	height: 40px;
+}
+
+.month-calendar.for-animations > table > tbody > tr > td {
+	height: 100px;
+	padding: 2.5px 7.5px;
+}
+
+.month-calendar > table > tbody > tr {
+	background-color: #FFF;
+}
+
+.month-calendar .mc-day {
+	position: relative;
+}
+
+.month-calendar .mc-day > .mcd-label {
+	font-weight: bold;
+	position: absolute;
+	bottom: 0;
+	right: 2.5px;
+}
+
+.mcd-reservation {
+	background-color: #F8B862;
+	cursor: pointer;
+	height: 100%;
+}
+
+.mcd-reservation.made-by-myself {
+	background-color: #94C054;
+}
+
+.month-calendar .mc-day .mcd-reservation.am {
+	display: inline-block;
+	float: left;
+	width: 50%;
+}
+
+.month-calendar .mc-day .mcd-reservation.pm {
+	display: inline-block;
+	float: right;
+	width: 50%;
+}
+
+.month-calendar .mc-day .mcd-reservation.wd {
+	width: 100%;
+}
+
+/* Images */
+.show-picture:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+/* Sauts de ligne */
+.br {
+	display: block;
+	height: 20px;
+	width: 100%;
+}
+
+/* Textes */
+.important {
+	color: #FF0921;
+	display: block;
+	font-size: 12px;
+	font-style: italic;
+	margin-bottom: 20px;
+	text-align: center;
+}

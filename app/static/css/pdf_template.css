@@ -1,0 +1,88 @@
+body {
+	color: #555;
+	font-family: 'Calibri';
+	font-size: 12px;
+	line-height: 1.3;
+	margin: 0 auto 0 auto;
+	text-align: justify;
+	width: 842px;
+}
+
+/* Contrôles */
+.pdf-attribute-wrapper {
+	color: #555;
+	margin-bottom: 20px;
+}
+
+.pdf-attribute-wrapper .pdf-attribute-label {
+	font-weight: bold;
+}
+
+.pdf-attributes-wrapper {
+	margin-bottom: -20px;
+}
+
+/* Lignes */
+.pdf-row {
+	display: inline-block;
+	width: 100%;
+}
+
+div[class^="pdf-col-"] {
+	float: left;
+}
+
+.pdf-col-6 {
+	width: 50%;
+}
+
+/* Sauts de page */
+.break {
+	page-break-after: always;
+}
+
+/* Tableaux HTML */
+.pdf-table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.pdf-table > thead > tr > th {
+	background-color: #F6F6F6;
+	font-weight: bold;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.pdf-table > thead > tr > th,
+.pdf-table > tbody > tr > td {
+	border: solid 1px #555;
+	padding: 2.5px 7.5px;
+}
+
+/* Textes */
+.pdf-important {
+	display: block;
+	font-size: 12px;
+	font-style: italic;
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+/* Titres */
+div[class^="pdf-title-"] {
+	color: #FFF;
+	margin-bottom: 20px;
+	text-align: center;
+	width: 100%;
+}
+
+.pdf-title-1 {
+	background-color: #F8B862;
+	font-size: 24px;
+}
+
+.pdf-title-2 {
+	background-color: #3770B1;
+	font-size: 16px;
+}

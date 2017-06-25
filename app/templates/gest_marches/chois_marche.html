@@ -1,0 +1,13 @@
+{% extends 'template.html' %}
+{% block content %}
+<div class="custom-well main-well">{{ title }}</div>
+<form action="" method="post" name="form_filtr_marche" onsubmit="ajax(event);">
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-sm-6">{{ form_filtr_marche.zl_prest }}</div>
+		<div class="col-sm-6">{{ form_filtr_marche.zl_annee_deb_marche }}</div>
+	</div>
+	{{ form_filtr_marche.zcc_sans_prest }}
+</form>
+{{ dtable_filtr_marche | safe }}
+{% endblock content %}

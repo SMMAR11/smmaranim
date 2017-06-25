@@ -1,0 +1,22 @@
+{% extends 'template.html' %}
+{% block content %}
+{% if connected_user %}
+{{ menu }}
+{% else %}
+<div class="row">
+	<div class="col-sm-6 col-sm-offset-3">
+		<div class="custom-form panel">
+			<div class="panel-heading">Connexion à la plateforme {{ app_name }}</div>
+			<div class="panel-body">
+				<form action="?action=login" method="post" name="form_login" onsubmit="ajax(event);">
+					{% csrf_token %}
+					{{ form_auth.zs_username }}
+					{{ form_auth.zs_password }}
+					<button class="center-block custom-button main-button" type="submit">Valider</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endblock content %}

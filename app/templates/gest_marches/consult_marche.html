@@ -1,0 +1,48 @@
+{% extends 'template.html' %}
+{% block content %}
+<div style="text-align: right;">
+	<a href="{% url 'chois_marche' %}" class="icon-with-text previous-icon">Revenir à la liste des marchés</a>
+</div>
+<div class="custom-well main-well">{{ title }}</div>
+<div class="row">
+	<div class="col-sm-9">
+		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
+			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
+			<li><a href="#ongl_anim" data-toggle="tab">Animations</a></li>
+			<li><a href="#ongl_dj_prep_real" data-toggle="tab">Demi-journées de préparation et de réalisation</a></li>
+		</ul>
+		<div class="tab-content">
+			<div id="ongl_caract" class="active fade in tab-pane">
+				<div class="attributes-wrapper">
+					{{ attrs_marche.int_marche }}
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_marche.dt_deb_marche }}</div>
+						<div class="col-sm-6">{{ attrs_marche.dt_fin_marche }}</div>
+					</div>
+					<div style="text-align: right;">
+						<span class="add-icon icon-with-text" data-target="#fm_ajout_pm" data-toggle="modal">Ajouter un prestataire au marché</span>
+					</div>
+					{{ attrs_marche.prest }}
+				</div>
+			</div>
+			<div id="ongl_anim" class="fade tab-pane">
+				<form action="?action=choisir-prestataire&onglet=anim" method="post" name="form_chois_pm__anim" onsubmit="ajax(event);">
+					{% csrf_token %}
+					{{ forms_chois_pm.anim.zl_prest }}
+				</form>
+				{{ dtables_chois_pm.anim | safe }}
+			</div>
+			<div id="ongl_dj_prep_real" class="fade tab-pane">
+				<form action="?action=choisir-prestataire&onglet=gest_prep_real" method="post" name="form_chois_pm__gest_prep_real" onsubmit="ajax(event);">
+					{% csrf_token %}
+					{{ forms_chois_pm.gest_prep_real.zl_prest }}
+				</form>
+				{{ dtables_chois_pm.gest_prep_real | safe }}
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-3">
+		<a href="{% url 'modif_marche' %}?id={{ m.get_pk }}" class="icon-with-text modify-icon">Modifier le marché</a>
+	</div>
+</div>
+{% endblock content %}

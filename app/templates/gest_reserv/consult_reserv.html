@@ -1,0 +1,119 @@
+{% extends 'template.html' %}
+{% block content %}
+<div style="text-align: right;">
+	<a href="{% url 'chois_reserv' %}" class="icon-with-text previous-icon">Revenir à la liste des réservations</a>
+</div>
+<div class="custom-well main-well">{{ title }}</div>
+<div class="row">
+	<div class="col-sm-9">
+		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
+			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
+			<li><a href="#ongl_expos" data-toggle="tab">Lieux d'exposition</a></li>
+			<li><a href="#ongl_cont_refer" data-toggle="tab">Contacts référents</a></li>
+		</ul>
+		<div class="tab-content">
+			<div id="ongl_caract" class="active fade in tab-pane">
+				<div class="attributes-wrapper">
+					<div class="alt-well custom-well">Données générales de la réservation</div>
+					{{ attrs_reserv.util }}
+					{{ attrs_reserv.org }}
+					{{ attrs_reserv.outil }}
+					{{ attrs_reserv.dt_reserv }}
+					<div class="alt-well custom-well">Contact référent de la réservation</div>
+					{{ attrs_reserv.nom_complet_refer_reserv }}
+					{{ attrs_reserv.courr_refer_reserv }}
+					{{ attrs_reserv.tel_refer_reserv }}
+					<div class="alt-well custom-well">Aides proposées par le SMMAR</div>
+					<span class="important">{{ aides_smmar }}</span>
+					{{ attrs_reserv.aides }}
+					<div class="alt-well custom-well">Données complémentaires de la réservation</div>
+					{{ attrs_reserv.comm_reserv }}
+				</div>
+			</div>
+			<div id="ongl_expos" class="fade tab-pane">
+				<div class="forbidden" style="text-align: right;">
+					<span class="add-icon icon-with-text" data-target="#fm_ajout_expos" data-toggle="modal">Ajouter un lieu d'exposition</span>
+				</div>
+				<div class="custom-table" id="dtable_consult_expos">
+					<table border="1" bordercolor="#DDD">
+						<thead>
+							<tr>
+								<th>Lieu de l'exposition</th>
+								<th>Commune</th>
+								<th>Date(s)</th>
+								<th>Contact référent</th>
+								<th></th>
+								<th class="forbidden"></th>
+								<th class="forbidden"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for e in r.get_expos.all %}
+							<tr>
+								<td>{{ e.get_lieu_expos }}</td>
+								<td>{{ e.get_comm }}</td>
+								<td>{{ e.get_dt_expos__fr_str }}</td>
+								<td>{{ e.get_rr }}</td>
+								<td>
+									<span action="?action=consulter-exposition&id={{ e.get_pk }}" class="icon-without-text inform-icon" modal-suffix="consult_expos" onclick="ajax(event);" title="Consulter le lieu d'exposition"></span>
+								</td>
+								<td class="forbidden">
+									<span action="?action=initialiser-formulaire-modification-exposition&id={{ e.get_pk }}" class="icon-without-text modify-icon" modal-suffix="modif_expos" onclick="ajax(event);" title="Modifier le lieu d'exposition"></span>
+								</td>
+								<td class="forbidden">
+									<span action="?action=supprimer-exposition-etape-1&id={{ e.get_pk }}" class="delete-icon icon-without-text" modal-suffix="suppr_expos" onclick="ajax(event);" title="Supprimer le lieu d'exposition"></span>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="ongl_cont_refer" class="fade tab-pane">
+				<div class="forbidden" style="text-align: right;">
+					<span class="add-icon icon-with-text" data-target="#fm_ajout_rr" data-toggle="modal">Ajouter un contact référent</span>
+				</div>
+				<div class="custom-table" id="dtable_consult_cont_refer">
+					<table border="1" bordercolor="#DDD">
+						<thead>
+							<tr>
+								<th>Nom complet</th>
+								<th>Courriel</th>
+								<th>Numéro de téléphone</th>
+								<th>Nombre de lieux d'exposition concernés</th>
+								<th class="forbidden"></th>
+								<th class="forbidden"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for rr in r.get_rr.all %}
+							<tr>
+								<td>{{ rr.get_nom_complet }}</td>
+								<td>{{ rr.courr_rr }}</td>
+								<td>{{ rr.get_tel_rr__deconstructed }}</td>
+								<td>{{ rr.get_expos__count }}</td>
+								<td class="forbidden">
+									<span action="?action=initialiser-formulaire-modification-referent-reservation&id={{ rr.get_pk }}" class="icon-without-text modify-icon" modal-suffix="modif_rr" onclick="ajax(event);" title="Modifier le contact référent"></span>
+								</td>
+								<td class="forbidden">
+									<span action="?action=supprimer-referent-reservation-etape-1&id={{ rr.get_pk }}" class="delete-icon icon-without-text" modal-suffix="suppr_rr" onclick="ajax(event);" title="Supprimer le contact référent"></span>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-3">
+		<div class="forbidden">
+			<a href="{% url 'modif_reserv' %}?id={{ r.get_pk }}" class="icon-with-text modify-icon">Modifier la réservation</a>
+			<br/>
+			<span action="?action=annuler-reservation-etape-1" class="delete-icon icon-with-text" onclick="ajax(event);" modal-suffix="annul_reserv">Annuler la réservation</span>
+			<div class="br"></div>
+		</div>
+		<a href="?action=imprimer-reservation" class="icon-with-text print-icon" target="blank">Imprimer la réservation</a>
+	</div>
+</div>
+{% endblock content %}

@@ -1,0 +1,76 @@
+{% extends 'template.html' %}
+{% block content %}
+{% if r %}
+<div style="text-align: right;">
+	<a href="{% url 'consult_reserv' r.get_pk %}" class="icon-with-text previous-icon">Revenir à la réservation</a>
+</div>
+{% endif %}
+<div class="custom-form panel">
+	<div class="panel-heading">{{ title }}</div>
+	<div class="has-pf panel-body">
+		<form action="" method="post" name="form_ger_reserv" onsubmit="ajax(event);">
+			{% csrf_token %}
+			<div class="panel-fieldset row">Données générales de la réservation</div>
+			{{ form_ger_reserv.id_outil }}
+			{{ form_ger_reserv.rb_dt_reserv }}
+			<div id="za_dt_reserv__on">
+				<div class="row">
+					<div class="col-sm-6">{{ form_ger_reserv.zd_dt_deb_reserv }}</div>
+					<div class="col-sm-6">{{ form_ger_reserv.zl_borne_dt_deb_reserv }}</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6">{{ form_ger_reserv.zd_dt_fin_reserv }}</div>
+					<div class="col-sm-6">{{ form_ger_reserv.zl_borne_dt_fin_reserv }}</div>
+				</div>
+			</div>
+			<div id="za_dt_reserv__off">
+				<div class="row">
+					<div class="col-sm-6">{{ form_ger_reserv.zd_dt_reserv }}</div>
+					<div class="col-sm-6">{{ form_ger_reserv.zl_borne_dt_reserv }}</div>
+				</div>
+			</div>
+			<div class="panel-fieldset row">Contact référent de la réservation</div>
+			<div class="row">
+				<div class="col-sm-6">{{ form_ger_reserv.nom_refer_reserv }}</div>
+				<div class="col-sm-6">{{ form_ger_reserv.prenom_refer_reserv }}</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">{{ form_ger_reserv.courr_refer_reserv }}</div>
+				<div class="col-sm-6">{{ form_ger_reserv.tel_refer_reserv }}</div>
+			</div>
+			<div class="panel-fieldset row">Aides proposées par le SMMAR</div>
+			<span class="important">{{ aides_smmar }}</span>
+			<div class="row">
+				<div class="col-sm-4">{{ form_ger_reserv.doit_livrer }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.quand_livrer }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.ou_livrer }}</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">{{ form_ger_reserv.doit_monter }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.quand_monter }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.ou_monter }}</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">{{ form_ger_reserv.doit_chercher }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.quand_chercher }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.ou_chercher }}</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">{{ form_ger_reserv.doit_demonter }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.quand_demonter }}</div>
+				<div class="col-sm-4">{{ form_ger_reserv.ou_demonter }}</div>
+			</div>
+			<div class="panel-fieldset row">Données complémentaires de la réservation</div>
+			{{ form_ger_reserv.comm_reserv }}
+			<button class="center-block custom-button main-button" type="submit">Valider</button>
+		</form>
+		<script type="text/javascript">
+			
+			// Désaffichage d'un bloc date
+			var tranche = {% if r %}{% if r.get_dt_reserv|length > 1 %}1{% else %}0{% endif %}{% else %}1{% endif %};
+			$('#za_dt_reserv__' + (tranche == 1 ? 'off' : 'on')).hide();
+
+		</script>
+	</div>
+</div>
+{% endblock content %}
