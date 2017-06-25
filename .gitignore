@@ -1,5 +1,6 @@
 .env
-*.pyc
+app/migrations/
+csv/
 mail_dumps/
 media/
-app/migrations/
+*.pyc
