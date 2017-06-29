@@ -17,10 +17,10 @@ def sub(_obj) :
 
 	if _obj and settings.USE_L10N == True :
 		if isinstance(_obj, datetime.datetime) :
-			output = date_format(_obj, 'd/m/Y H:i:s')
+			output = date_format(_obj, 'd/m/Y H:i')
 		elif isinstance(_obj, datetime.date) :
 			output = date_format(_obj, 'd/m/Y')
 		elif isinstance(_obj, datetime.time) :
-			output = [time_format(_obj, 'H:M:S'), time_format(_obj, 'HhM')]	
+			output = time_format(_obj, 'H:i')
 
 	return output

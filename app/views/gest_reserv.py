@@ -128,7 +128,6 @@ def chois_reserv(_req) :
 	from app.forms.gest_reserv import FiltrerReservation
 	from app.functions.form_init import sub as form_init
 	from app.functions.modal_init import sub as modal_init
-	from app.models import TOutil
 	from app.models import TReservation
 	from django.core.urlresolvers import reverse
 	from django.http import HttpResponse
@@ -152,12 +151,14 @@ def chois_reserv(_req) :
 				contenu = '''
 				{}
 				{}
+				{}
 				<div class="row">
 					<div class="col-sm-6">{}</div>
 					<div class="col-sm-6">{}</div>
 				</div>
 				<a href="{}" class="icon-with-text inform-icon">Consulter la réservation</a>
 				'''.format(
+					attrs_reserv['outil'],
 					attrs_reserv['dt_reserv'],
 					attrs_reserv['nom_complet_refer_reserv'],
 					attrs_reserv['courr_refer_reserv'],
@@ -169,20 +170,6 @@ def chois_reserv(_req) :
 				output = HttpResponse(
 					json.dumps({ 'success' : { 
 						'modal_content' : contenu
-					}}),
-					content_type = 'application/json'
-				)
-
-			# Affichage d'un outil
-			if _req.GET['action'] == 'afficher-outil' and 'id' in _req.GET :
-
-				# Obtention d'une instance TOutil
-				obj_outil = TOutil.objects.get(pk = _req.GET['id'])
-
-				# Affichage
-				output = HttpResponse(
-					json.dumps({ 'success' : { 
-						'modal_content' : obj_outil.get_photo_outil__img({ 'style' : 'width: 100%;' })
 					}}),
 					content_type = 'application/json'
 				)

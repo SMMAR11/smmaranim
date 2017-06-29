@@ -38,8 +38,8 @@
 									<span class="caret"></span>
 								</a>
 								<ul class="dropdown-menu">
-									<li><a href="#">Consulter mon compte</a></li>
-									{% if connected_user.get_is_superadmin %}
+									<li><a href="{% url 'consult_compte' %}">Consulter mon compte</a></li>
+									{% if connected_user.get_is_staff %}
 									<li><a href="/admin/">Accéder au site d'administration de {{ app_name }}</a></li>
 									{% endif %}
 									{% if connected_user.get_est_superadmin == 0 %}

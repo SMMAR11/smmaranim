@@ -12,6 +12,7 @@
 .add-icon {
 	background: url('../images/icons/add.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -20,6 +21,16 @@
 .delete-icon {
 	background: url('../images/icons/delete.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.download-icon {
+	background: url('../images/icons/download.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -28,6 +39,7 @@
 .half-icon {
 	background: url('../images/icons/half.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -36,6 +48,7 @@
 .help-icon {
 	background: url('../images/icons/help.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: inline-block;
 	height: 19.5px;
 	margin-left: 2.5px;
@@ -47,6 +60,16 @@
 .inform-icon {
 	background: url('../images/icons/inform.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.manage-icon {
+	background: url('../images/icons/manage.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -55,6 +78,16 @@
 .modify-icon {
 	background: url('../images/icons/modify.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.pdf-icon {
+	background: url('../images/icons/pdf.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -63,6 +96,7 @@
 .previous-icon {
 	background: url('../images/icons/previous.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -71,6 +105,16 @@
 .print-icon {
 	background: url('../images/icons/print.png') no-repeat;
 	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
+.statement-icon {
+	background: url('../images/icons/statement.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
 	display: block;
 	height: 19.5px;
 	width: 19.5px;
@@ -122,8 +166,8 @@
 }
 
 .month-calendar.for-animations > table > tbody > tr > td {
-	height: 100px;
-	padding: 2.5px 7.5px;
+	height: 80px;
+	vertical-align: top;
 }
 
 .month-calendar > table > tbody > tr {
@@ -141,13 +185,13 @@
 	right: 2.5px;
 }
 
-.mcd-reservation {
+.month-calendar .mc-day .mcd-reservation {
 	background-color: #F8B862;
 	cursor: pointer;
 	height: 100%;
 }
 
-.mcd-reservation.made-by-myself {
+.month-calendar .mc-day .mcd-reservation.made-by-myself {
 	background-color: #94C054;
 }
 
@@ -167,10 +211,27 @@
 	width: 100%;
 }
 
-/* Images */
-.show-picture:hover {
+.month-calendar.for-animations .mc-day > .mcd-content {
+	display: block;
+	margin-bottom: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.month-calendar.for-animations .mc-day > .mcd-content .mcd-rdv {
+	display: block;
+	padding: 2.5px 7.5px;
+}
+
+.month-calendar.for-animations .mc-day > .mcd-content .mcd-rdv:hover {
+	background-color: #F6F6F6;
 	cursor: pointer;
-	opacity: 0.5;
+}
+
+/* Mise en page */
+#dtable_plaq tbody tr td:first-child,
+#dtable_zcc_plaq tbody tr td:first-child {
+	text-align: center;
 }
 
 /* Sauts de ligne */
@@ -180,6 +241,12 @@
 	width: 100%;
 }
 
+@media (max-width: 767px) {
+	.br-sm {
+		padding-top: 20px;
+	}
+}
+
 /* Textes */
 .important {
 	color: #FF0921;
@@ -187,5 +254,12 @@
 	font-size: 12px;
 	font-style: italic;
 	margin-bottom: 20px;
+	text-align: center;
+}
+
+.very-important {
+	color: #FF0921;
+	display: block;
+	font-weight: bold;
 	text-align: center;
 }

@@ -61,10 +61,23 @@ INCLUDE_FILES = {
 
 MAX_SIZE = 5
 
+MAY_BE_REQUIRED_FIELD = '<span class="may-be-required-field"></span>'
+
 MENU = {
 	'gest_anim' : {
 		'mod_img' : settings.STATIC_URL + 'images/thumbnails/gest_anim/main.png',
-		'mod_items' : {},
+		'mod_items' : {
+			'ajout_anim' : {
+				'item_img' : settings.STATIC_URL + 'images/thumbnails/gest_anim/ajout_anim.png',
+				'item_name' : 'Ajouter une animation',
+				'item_url_name' : 'ajout_anim'
+			},
+			'consult_reserv' : {
+				'item_img' : settings.STATIC_URL + 'images/thumbnails/gest_anim/consult_anim.png',
+				'item_name' : 'Consulter une animation',
+				'item_url_name' : 'chois_anim'
+			}
+		},
 		'mod_name' : 'Gestion des animations',
 		'mod_rank' : 3,
 		'mod_rights' : ['A', 'PCDA'],
@@ -154,7 +167,10 @@ MONTHS = [
 
 PDF_INCLUDE_FILES = ['css/pdf_template.css']
 
-PKS = { 'id_type_public__jp' : config('JEUNE_PUBLIC__PK', cast = int) }
+PKS = {
+	'id_type_public__jps' : config('JEUNE_PUBLIC_SCOLAIRE__PK', cast = int),
+	'id_type_public__jpes' : config('JEUNE_PUBLIC_EXTRA_SCOLAIRE__PK', cast = int)
+}
 
 REQUIRED_FIELD = '<span class="required-field"></span>'
 

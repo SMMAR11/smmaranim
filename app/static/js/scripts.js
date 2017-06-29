@@ -2,8 +2,8 @@
 var dtables = {};
 var date_radiobuttons = ['AjouterExposition-rb_dt_expos', 'ModifierExposition-rb_dt_expos', 'rb_dt_reserv'];
 var forms = [
-	'chois_pm__anim',
 	'chois_pm__gest_prep_real',
+	'chois_pm__projet',
 	'filtr_anim',
 	'filtr_marche',
 	'filtr_projet',
@@ -51,23 +51,30 @@ $(window).on('load', function() {
 		// Initialisation des datatables
 		dtables = {
 			'aides' : init_datatable('#dtable_aides'),
+			'anims' : init_datatable('#dtable_anims', { 'autofit' : [5], 'unsorting' : [5] }),
 			'chois_marche' : init_datatable('#dtable_chois_marche', { 'autofit' : [4], 'unsorting' : [1, 2, 4] }),
-			'chois_projet' : init_datatable('#dtable_chois_projet', { 'autofit' : [4], 'unsorting' : [4] }),
-			'consult_anim' : init_datatable('#dtable_consult_anim'),
-			'consult_cep' : init_datatable(
-				'#dtable_consult_cep', { 'autofit' : [3, 4, 5], 'unbordered' : [3, 4, 5], 'unsorting' : [3, 4, 5] }
-			),
+			'chois_projet' : init_datatable('#dtable_chois_projet', { 'autofit' : [5], 'unsorting' : [5] }),
+			'consult_cep' : init_datatable('#dtable_consult_cep'),
 			'consult_cont_refer' : init_datatable(
 				'#dtable_consult_cont_refer', { 'autofit' : [4, 5], 'unbordered' : [4, 5], 'unsorting' : [4, 5] }
 			),
 			'consult_expos' : init_datatable(
 				'#dtable_consult_expos', { 'autofit' : [4, 5, 6], 'unbordered' : [4, 5, 6], 'unsorting' : [4, 5, 6] }
 			),
+			'consult_pm' : init_datatable('#dtable_consult_pm', { 'autofit' : [8], 'unsorting' : [8] }),
+			'consult_projet' : init_datatable('#dtable_consult_projet', { 'autofit' : [5], 'unsorting' : [5] }),
+			'consult_ta' : init_datatable('#dtable_consult_ta'),
 			'consult_tdj' : init_datatable('#dtable_consult_tdj', { 'unsorting' : [2] }),
+			'ger_cep' : init_datatable('#dtable_ger_cep', { 'autofit' : [2], 'unsorting' : '_all' }),
+			'ger_point' : init_datatable('#dtable_ger_point', { 'autofit' : [3], 'unsorting' : '_all' }),
+			'ger_ta' : init_datatable('#dtable_ger_ta', { 'autofit' : [3], 'unsorting' : '_all' }),
 			'ger_tdj' : init_datatable('#dtable_ger_tdj', { 'autofit' : [2], 'unsorting' : '_all' }),
+			'plaq' : init_datatable('#dtable_plaq', { 'autofit' : [0], 'unsorting' : [0] }),
+			'point' : init_datatable('#dtable_point'),
 			'prest' : init_datatable(
-				'#dtable_prest', { 'autofit' : [2, 3], 'unbordered' : [7, 8, 9], 'unsorting' : [7, 8, 9] }
+				'#dtable_prest', { 'autofit' : [2, 3, 4], 'unbordered' : [8, 9, 10], 'unsorting' : [8, 9, 10] }
 			),
+			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' })
 		};
 
@@ -187,3 +194,58 @@ for (var i = 0; i < date_radiobuttons.length; i += 1) {
 		}
 	});
 }
+
+/**
+ * Obtention du nom d'un fichier uploadé
+ */
+$(document).on('change', 'input[type="file"]', function() {
+
+	// Obtention d'un élément "field-wrapper"
+	var fw = $('#fw_' + $(this).attr('name'));
+
+	// Retrait du nom de l'ancien fichier uploadé
+	fw.find('.if-return').remove();
+
+	// Préparation du nom du nouveau fichier uploadé
+	var div = $('<div/>', { 'class' : 'if-return' });
+	var span = $('<span/>', { 'class' : 'file-infos', html : ' ' + $(this).val() });
+
+	// Affichage du nom du nouveau fichier uploadé
+	div.append(span);
+	div.insertAfter(fw.find('.if-trigger'));
+
+	// Application d'un style CSS.
+	fw.find('.if-trigger').css('margin-right', '3.5px');
+});
+
+/**
+ * Cochage/décochage automatique d'un groupe de cases à cocher
+ */
+$('input[type="checkbox"]').on('change', function() {
+
+	// Obtention d'un objet case à cocher
+	var obj = $(this);
+
+	if (obj.val() == '__ALL__') {
+
+		// Stockage du nom du groupe de cases à cocher
+		var get_name = obj.attr('id').substr(3);
+		get_name = get_name.substr(0, get_name.length - 5);
+
+		$('input[name="' + get_name + '"]').each(function() {
+			if (obj.is(':checked')) {
+				this.checked = true;
+			}
+			else {
+				this.checked = false;
+			}
+		});
+	}
+	else {
+
+		// Décochage de la case à cocher permettant le cochage/décochage automatique d'un groupe de cases à cocher
+		if (obj.is(':checked') == false) {
+			$('#id_' + obj.attr('name') + '__all').prop('checked', false);
+		}
+	}
+});

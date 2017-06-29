@@ -71,3 +71,63 @@
 .attributes-wrapper {
 	margin-bottom: -20px;
 }
+
+.if-container {
+	position: relative;
+}
+
+.if-container > .field > input[type="file"] {
+	position: absolute;
+	left: 0;
+	top: 0;
+	cursor: pointer;
+	opacity: 0;
+	width: 75px;
+}
+
+.if-trigger {
+	background-color: #F8B862;
+	border: none;
+	border-radius: 5px;
+	color: #FFF;
+	display: inline-block;
+	padding: 2.5px 7.5px;
+}
+
+.if-container > .field:hover + .if-trigger {
+	background-color: #C7944F;
+}
+
+.if-return {
+	color: #555;
+	display: inline-block;
+}
+
+.if-return > .file-infos {
+	color: #555;
+	display: inline-block;
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.if-return > .file-infos:not(:empty):before {
+	content: 'Fichier :';
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+.if-return > .delete-file {
+	display: inline-block;
+}
+
+.if-return > .delete-file > label {
+	color: #FF0921;
+	font-style: italic;
+	font-weight: normal;
+	margin-bottom: 0;
+}
+
+.if-return > .delete-file > input,
+.if-return > .delete-file > label {
+	cursor: pointer;
+}

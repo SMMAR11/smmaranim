@@ -211,15 +211,19 @@ class ChoisirPrestataireMarche(forms.Form) :
 
 	def get_datatable(self, _req, *args, **kwargs) :
 
+		# Import
+		from django.core.urlresolvers import reverse
+
 		# Stockage des données du formulaire
 		val_prest = self.fields['zl_prest'].initial if _req.method == 'GET' else self.cleaned_data.get('zl_prest')
+
+		# Tentative d'obtention d'une instance TPrestatairesMarche
+		obj_pm = self.kw_marche.get_pm().get(id_prest = val_prest) if val_prest else None
 
 		trs = []
 		if self.kw_onglet == 'gest_prep_real' :
 
-			# Tentative d'obtention d'une instance TPrestatairesMarche
-			obj_pm = self.kw_marche.get_pm().get(id_prest = val_prest) if val_prest else None
-
+			# Empilement des balises <tr/>
 			if obj_pm :
 				trs += [[
 					tdj.get_pm().get_prest(),
@@ -244,10 +248,34 @@ class ChoisirPrestataireMarche(forms.Form) :
 			'''
 
 		else :
+
+			# Empilement des balises <tr/>
+			if obj_pm :
+				trs += [[
+					p.get_int_projet(),
+					p.get_org(),
+					p.get_type_interv(),
+					p.get_sti() or '-',
+					p.get_type_public(),
+					'''
+					<a href="{}" class="inform-icon pull-right" title="Consulter le projet"></a>
+					'''.format(reverse('consult_projet', args = [p.get_pk()]))
+				] for p in obj_pm.get_projet().all()]
+
+
 			output = '''
-			<div class="custom-table" id="dtable_consult_anim">
+			<div class="custom-table" id="dtable_consult_projet">
 				<table border="1" bordercolor="#DDD">
-					<thead><tr><th></th></tr></thead>
+					<thead>
+						<tr>
+							<th>Intitulé du projet</th>
+							<th>Organisme</th>
+							<th>Type d'intervention</th>
+							<th>Événement</th>
+							<th>Type de public visé</th>
+							<th>
+						</tr>
+					</thead>
 					<tbody>{}</tbody>
 				</table>
 			</div>
@@ -291,7 +319,6 @@ class GererTransactionDemiJournees(forms.ModelForm) :
 		from app.forms.gest_marches import GererTransactionDemiJournees
 		from app.functions.datatable_reset import sub as datatable_reset
 		from app.functions.formset_init import sub as formset_init
-		from django.forms import formset_factory
 
 		# Définition des valeurs initiales de chaque formulaire du formset si besoin
 		initial = [{

@@ -40,10 +40,22 @@
 	font-style: italic;
 }
 
+.may-be-required-field:before {
+	color: #FF0921;
+	content: ' (peut être requis)';
+	font-size: 12px;
+	font-style: italic;
+}
+
 .field-wrapper .field .invalid-field {
-	border: solid 1px #FF0921;
+	/*border: solid 1px #FF0921;*/
 	box-shadow : 0 0 5px rgba(255, 9, 33, 0.8);
 	-webkit-box-shadow : 0 0 5px rgba(255, 9, 33, 0.8);
+}
+
+.field-wrapper .field ul.invalid-field {
+	box-shadow : none;
+	-webkit-box-shadow : none;
 }
 
 .field-wrapper .field-error-message > ul {

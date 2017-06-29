@@ -11,6 +11,7 @@ def sub(_form) :
 	from bs4 import BeautifulSoup
 	from django.template.defaultfilters import safe
 	from smmaranim.custom_settings import ERROR_MESSAGES
+	from smmaranim.custom_settings import MAY_BE_REQUIRED_FIELD
 	from smmaranim.custom_settings import REQUIRED_FIELD
 
 	output = {}
@@ -29,21 +30,26 @@ def sub(_form) :
 		# Surchargement des messages d'erreur
 		for cle, val in ERROR_MESSAGES.items() : _form.fields[champ.name].error_messages[cle] = val
 
+		# Conversion du champ en code HTML (<=> chaîne de caractères)
+		champ__str = BeautifulSoup('{}'.format(champ), 'html.parser')
+
 		# Ajout d'une note à la fin du label de chaque champ obligatoire
 		if champ.label :
 			strs = champ.label.split('|')
-			if _form.fields[champ.name].required == True : strs[0] += REQUIRED_FIELD
+			if _form.fields[champ.name].required == True :
+				strs[0] += REQUIRED_FIELD
+			else :
+				for elem in champ__str.find_all() :
+					if 'may-be-required' in elem.attrs.keys() : strs[0] += MAY_BE_REQUIRED_FIELD
 			if champ.help_text : strs[0] += '<span class="help-icon" title="{}"></span>'.format(champ.help_text)
 			champ.label = '|'.join(strs)
 
 		# Définition de la valeur de l'attribut name
 		attr_name = '{}-{}'.format(_form.prefix, champ.name) if _form.prefix else champ.name
 
-		# Conversion du champ en code HTML (<=> chaîne de caractères)
-		champ__str = BeautifulSoup('{}'.format(champ), 'html.parser')
-
 		# Suppression de l'attribut required
 		for elem in champ__str.find_all() :
+			if 'may-be-required' in elem.attrs.keys() : del elem['may-be-required']
 			if 'required' in elem.attrs.keys() : del elem['required']
 
 		# Obtention du type de champ
@@ -58,6 +64,47 @@ def sub(_form) :
 				<span class="field-error-message"></span>
 			</div>
 			'''.format(attr_name, champ__str, champ.label)
+		elif type_champ == 'ClearableFileInput' :
+
+			# Stockage des inputs de type file et checkbox
+			input_checkbox = champ__str.find('input', { 'type' : 'checkbox' })
+			input_file = champ__str.find('input', { 'type' : 'file' })
+
+			# Initialisation du bloc informations
+			infos = ''
+			for a in champ__str.find_all('a') :
+
+				# Affichage de l'option "Effacer" si définie
+				if input_checkbox :
+					delete = '''
+					<span class="delete-file">
+						{}
+						<label for="{}-clear_id">Effacer</label>
+					</span>
+					'''.format(input_checkbox, attr_name)
+				else :
+					delete = ''
+
+				infos = '''
+				<div class="if-return">
+					<span class="file-infos">
+						{}
+					</span>
+					{}
+				</div>
+				'''.format(a['href'], delete)
+
+			gabarit = '''
+				<div class="field-wrapper" id="fw_{}">
+					<span class="field-label">{}</span>
+					<div class="if-container">
+						<span class="field">{}</span>
+						<span class="if-trigger">Parcourir</span>
+						{}
+					</div>
+					<span class="field-error-message"></span>
+				</div>
+				'''.format(attr_name, champ.label, input_file, infos)
 		elif type_champ == 'DateInput' :
 			gabarit = '''
 			<div class="field-wrapper" id="fw_{}">
@@ -176,9 +223,59 @@ def sub(_form) :
 
 		elif type_champ == 'Select' :
 			gabarit = gabarit_defaut.format(attr_name, champ.label, champ__str)
+		elif type_champ == 'SelectMultiple' :
+
+			# Stockage des labels
+			labels = champ.label.split('|')
+
+			# Initialisation des balises <tr/> de la balise <tbody/>
+			trs = []
+			for option in champ__str.find_all('option') :
+				tds = []
+				for index, elem in enumerate(option.text.split('|')) :
+					td_content = elem
+					if elem == '__zcc__' :
+						kwargs = {
+							'id' : 'id_{}_{}'.format(attr_name, index),
+							'name' : attr_name,
+							'type' : 'checkbox',
+							'value' : option['value']
+						} 
+						if option.has_attr('selected') : kwargs['checked'] = True
+						td_content = '<input {}>'.format(
+							' '.join(['{}="{}"'.format(cle, val) for cle, val in kwargs.items()])
+						)
+					tds.append('<td>{}</td>'.format(td_content))
+				trs.append('<tr>{}</tr>'.format(''.join(tds)))
+
+				gabarit = '''
+				<div class="field-wrapper" id="fw_{}">
+					<span class="field-label">{}</span>
+					<div class="custom-table" id="dtable_{}">
+						<table border="1" bordercolor="#DDD">
+							<thead>
+								<tr>{}</tr>
+							</thead>
+							<tbody>{}</tbody>
+						</table>
+					</div>
+					<span class="field-error-message"></span>
+				</div>
+				'''.format(
+					attr_name,
+					labels[0],
+					attr_name,
+					''.join(['<th>{}</th>'.format(
+						elem if elem != '__zcc__' else '<input type="checkbox" id="id_{}__all" value="__ALL__">' \
+						.format(attr_name)
+					) for elem in labels[1:]]),
+					''.join(trs)
+				)
 		elif type_champ == 'Textarea' :
 			gabarit = gabarit_defaut.format(attr_name, champ.label, champ__str)
 		elif type_champ == 'TextInput' :
+			gabarit = gabarit_defaut.format(attr_name, champ.label, champ__str)
+		elif type_champ == 'TimeInput' :
 			gabarit = gabarit_defaut.format(attr_name, champ.label, champ__str)
 		else :
 			gabarit = None

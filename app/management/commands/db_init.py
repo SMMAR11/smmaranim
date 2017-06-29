@@ -91,7 +91,14 @@ class Command(BaseCommand) :
 
 		# Initialisation des données attributaires de chaque type de public
 		attrs_type_public = [
-			'Agriculteurs', 'Élus', 'Entreprises', 'Handicapés', 'Grand public', 'Jeune public', 'Personnes agées'
+			'Agriculteurs',
+			'Élus',
+			'Entreprises',
+			'Handicapés',
+			'Grand public',
+			'Jeune public extra-scolaire',
+			'Jeune public scolaire',
+			'Personnes agées'
 		]
 
 		# Création des instances TTypePublic
@@ -101,19 +108,20 @@ class Command(BaseCommand) :
 
 		# Initialisation des données attributaires de chaque classe
 		attrs_classe = [
-			{ 'int_classe' : 'CE1', 'ordre_ld_classe' : 2 },
-			{ 'int_classe' : 'CE2', 'ordre_ld_classe' : 3 },
-			{ 'int_classe' : 'Cinquième', 'ordre_ld_classe' : 7 },
-			{ 'int_classe' : 'CM1', 'ordre_ld_classe' : 4 },
-			{ 'int_classe' : 'CM2', 'ordre_ld_classe' : 5 },
-			{ 'int_classe' : 'CP', 'ordre_ld_classe' : 1 },
-			{ 'int_classe' : 'Post Bac', 'ordre_ld_classe' : 13 },
-			{ 'int_classe' : 'Première', 'ordre_ld_classe' : 11 },
-			{ 'int_classe' : 'Quatrième', 'ordre_ld_classe' : 8 },
-			{ 'int_classe' : 'Seconde', 'ordre_ld_classe' : 10 },
-			{ 'int_classe' : 'Sixième', 'ordre_ld_classe' : 6 },
-			{ 'int_classe' : 'Terminale', 'ordre_ld_classe' : 12 },
-			{ 'int_classe' : 'Troisième', 'ordre_ld_classe' : 9 }
+			{ 'int_classe' : 'CE1', 'ordre_ld_classe' : 3 },
+			{ 'int_classe' : 'CE2', 'ordre_ld_classe' : 4 },
+			{ 'int_classe' : 'Cinquième', 'ordre_ld_classe' : 8 },
+			{ 'int_classe' : 'CM1', 'ordre_ld_classe' : 5 },
+			{ 'int_classe' : 'CM2', 'ordre_ld_classe' : 6 },
+			{ 'int_classe' : 'CP', 'ordre_ld_classe' : 2 },
+			{ 'int_classe' : 'Maternelle', 'ordre_ld_classe' : 1 },
+			{ 'int_classe' : 'Post Bac', 'ordre_ld_classe' : 14 },
+			{ 'int_classe' : 'Première', 'ordre_ld_classe' : 12 },
+			{ 'int_classe' : 'Quatrième', 'ordre_ld_classe' : 9 },
+			{ 'int_classe' : 'Seconde', 'ordre_ld_classe' : 11 },
+			{ 'int_classe' : 'Sixième', 'ordre_ld_classe' : 7 },
+			{ 'int_classe' : 'Terminale', 'ordre_ld_classe' : 13 },
+			{ 'int_classe' : 'Troisième', 'ordre_ld_classe' : 10 }
 		]
 
 		# Création des instances TClasse

@@ -6,10 +6,11 @@
 <div class="custom-well main-well">{{ title }}</div>
 <div class="row">
 	<div class="col-sm-9">
-{% if ongl_cep__show == True %}
+{% if onglets.ongl_cep == True or onglets.ongl_ta == True %}
 		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
 			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
-			<li><a href="#ongl_cep" data-toggle="tab">Classes</a></li>
+			{% if onglets.ongl_cep == True %}<li><a href="#ongl_cep" data-toggle="tab">Classes</a></li>{% endif %}
+			{% if onglets.ongl_ta == True %}<li><a href="#ongl_ta" data-toggle="tab">Tranches d'âge</a></li>{% endif %}
 		</ul>
 		<div class="tab-content">
 			<div id="ongl_caract" class="active fade in tab-pane">
@@ -23,13 +24,18 @@
 						<div class="col-sm-6">{{ attrs_projet.sti }}</div>
 					</div>
 					{{ attrs_projet.type_public }}
+					{{ attrs_projet.anims }}
+					{{ attrs_projet.refer_projet }}
+					{{ attrs_projet.courr_refer_projet }}
+					{{ attrs_projet.tel_refer_projet }}
 					{{ attrs_projet.comm_projet }}
 				</div>
-{% if ongl_cep__show == True %}
+{% if onglets.ongl_cep == True or onglets.ongl_ta == True %}
 			</div>
+			{% if onglets.ongl_cep == True %}
 			<div id="ongl_cep" class="fade tab-pane">
 				<div class="forbidden" style="text-align: right;">
-					<span class="add-icon icon-with-text" data-target="#fm_ajout_cep" data-toggle="modal">Ajouter une classe</span>
+					<span class="icon-with-text manage-icon" data-target="#fm_ger_cep" data-toggle="modal">Gérer les classes</span>
 				</div>
 				<div class="custom-table" id="dtable_consult_cep">
 					<table border="1" bordercolor="#DDD">
@@ -37,10 +43,6 @@
 							<tr>
 								<th>Classe</th>
 								<th>Établissement scolaire</th>
-								<th>Contact référent</th>
-								<th></th>
-								<th class="forbidden"></th>
-								<th class="forbidden"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -48,28 +50,48 @@
 							<tr>
 								<td>{{ cep.get_classe }}</td>
 								<td>{{ cep.get_ecole }}</td>
-								<td>{{ cep.get_nom_complet }}</td>
-								<td>
-									<span action="?action=consulter-classe-ecole-projet&id={{ cep.get_pk }}" class="icon-without-text inform-icon" modal-suffix="consult_cep" onclick="ajax(event);" title="Consulter la classe"></span>
-								</td>
-								<td class="forbidden">
-									<span action="?action=initialiser-formulaire-modification-classe-ecole-projet&id={{ cep.get_pk }}" class="icon-without-text modify-icon" modal-suffix="modif_cep" onclick="ajax(event);" title="Modifier la classe"></span>
-								</td>
-								<td class="forbidden">
-									<span action="?action=supprimer-classe-ecole-projet-etape-1&id={{ cep.get_pk }}" class="delete-icon icon-without-text" modal-suffix="suppr_cep" onclick="ajax(event);" title="Supprimer la classe"></span>
-								</td>
 							</tr>
 							{% endfor %}
 						</tbody>
 					</table>
 				</div>
 			</div>
+			{% endif %}
+			{% if onglets.ongl_ta == True %}
+			<div id="ongl_ta" class="fade tab-pane">
+				<div class="forbidden" style="text-align: right;">
+					<span class="icon-with-text manage-icon" data-target="#fm_ger_ta" data-toggle="modal">Gérer les tranches d'âge</span>
+				</div>
+				<div class="custom-table" id="dtable_consult_ta">
+					<table border="1" bordercolor="#DDD">
+						<thead>
+							<tr>
+								<th>Âge minimum</th>
+								<th>Âge maximum</th>
+								<th>Structure d'accueil</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for ta in p.get_ta.all %}
+							<tr>
+								<td>{{ ta.get_min_ta }}</td>
+								<td>{{ ta.get_max_ta }}</td>
+								<td>{{ ta.get_int_struct_ta }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			{% endif %}
 		</div>
 {% endif %}
 	</div>
-	<div class="col-sm-3">
+	<div class="br-sm col-sm-3">
 		<div class="forbidden">
 			<a href="{% url 'modif_projet' %}?id={{ p.get_pk }}" class="icon-with-text modify-icon">Modifier le projet</a>
+			<br/>
+			<span action="?action=supprimer-projet-etape-1" class="delete-icon icon-with-text" modal-suffix="suppr_projet" onclick="ajax(event);">Supprimer le projet</span>
 			<div class="br"></div>
 		</div>
 		<a href="?action=imprimer-projet" class="icon-with-text print-icon" target="blank">Imprimer le projet</a>

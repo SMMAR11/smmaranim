@@ -1,0 +1,103 @@
+{% extends 'template.html' %}
+{% block content %}
+<div style="text-align: right;">
+	<a href="{% url 'chois_anim' %}" class="icon-with-text previous-icon">Revenir à la liste des animations</a>
+</div>
+<div class="custom-well main-well">{{ title }}</div>
+<div class="row">
+{% if can_access == True %}
+	<div class="col-sm-9">
+{% else %}
+	<div class="col-sm-12">
+{% endif %}
+{% if b %}
+		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
+			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
+			<li><a href="#ongl_bilan" data-toggle="tab">Bilan</a></li>
+		</ul>
+		<div class="tab-content">
+			<div id="ongl_caract" class="active fade in tab-pane">
+{% endif %}
+				<div class="attributes-wrapper">
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_anim.prest }}</div>
+						<div class="col-sm-6">{{ attrs_anim.projet }}</div>
+					</div>
+					{{ attrs_anim.dt_heure_anim }}
+					{{ attrs_anim.nat_anim }}
+					{{ attrs_anim.nbre_dj_anim }}
+					{{ attrs_anim.struct }}
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_anim.lieu_anim }}</div>
+						<div class="col-sm-6">{{ attrs_anim.comm }}</div>
+					</div>
+				</div>
+{% if b %}
+			</div>
+			<div id="ongl_bilan" class="fade tab-pane">
+				{% if b.get_ba %}
+				<div class="attributes-wrapper">
+					<div class="alt-well custom-well">Données générales de l'animation</div>
+					{{ attrs_bilan.util }}
+					{{ attrs_bilan.org }}
+					{{ attrs_bilan.titre_ba }}
+					<div class="row">
+						<div class="col-md-6">{{ attrs_bilan.nbre_pers_pres_ba }}</div>
+						<div class="col-md-6">{{ attrs_bilan.nbre_pers_prev_ba }}</div>
+					</div>
+					{{ attrs_bilan.theme_ba }}
+					{{ attrs_bilan.themat_abord_ba }}
+					{{ attrs_bilan.deroul_ba }}
+					<div class="row">
+						<div class="col-md-6">{{ attrs_bilan.en_inter }}</div>
+						<div class="col-md-6">{{ attrs_bilan.en_exter }}</div>
+					</div>
+					<div class="alt-well custom-well">Contact référent de l'animation</div>
+					{{ attrs_bilan.refer_bilan }}
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_bilan.fonct_refer_bilan }}</div>
+						<div class="col-sm-6">{{ attrs_bilan.struct_refer_bilan }}</div>
+					</div>
+					<div class="alt-well custom-well">Ressenti de l'animation</div>
+					{{ attrs_bilan.eval_ba }}
+					{{ attrs_bilan.point }}
+					<div class="alt-well custom-well">Données complémentaires de l'animation</div>
+					{{ attrs_bilan.plaq }}
+					{{ attrs_bilan.photo_ba }}
+					{{ attrs_bilan.rdp_1_ba }}
+					{{ attrs_bilan.rdp_2_ba }}
+					{{ attrs_bilan.rdp_3_ba }}
+					{{ attrs_bilan.outil_ba }}
+					{{ attrs_bilan.comm_bilan }}
+				</div>
+				{% else %}
+				<div class="attributes-wrapper">
+					{{ attrs_bilan.util }}
+					{{ attrs_bilan.org }}
+					{{ attrs_bilan.refer_bilan }}
+					<div class="row">
+						<div class="col-sm-6">{{ attrs_bilan.fonct_refer_bilan }}</div>
+						<div class="col-sm-6">{{ attrs_bilan.struct_refer_bilan }}</div>
+					</div>
+					{{ attrs_bilan.comm_bilan }}
+				</div>
+				{% endif %}
+			</div>
+		</div>
+{% endif %}
+	</div>
+{% if can_access == True %}
+	<div class="br-sm col-sm-3">
+		<a href="{% url 'modif_anim' %}?id={{ a.get_pk }}" class="icon-with-text modify-icon">Modifier l'animation</a>
+		<br/>
+		<span action="?action=supprimer-animation-etape-1" class="delete-icon icon-with-text" modal-suffix="suppr_anim" onclick="ajax(event);">Supprimer l'animation</span>
+		<div class="br"></div>
+		<span class="icon-with-text statement-icon" data-target="#fm_ger_bilan" data-toggle="modal">{{ mt_ger_bilan }}</span>
+		<br/>
+		{% if b %}
+		<span action="?action=supprimer-bilan-etape-1" class="delete-icon icon-with-text" modal-suffix="suppr_bilan" onclick="ajax(event);">Supprimer le bilan</span>
+		{% endif %}
+	</div>
+{% endif %}
+</div>
+{% endblock content %}

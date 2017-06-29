@@ -8,7 +8,7 @@
 	<div class="col-sm-9">
 		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
 			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
-			<li><a href="#ongl_anim" data-toggle="tab">Animations</a></li>
+			<li><a href="#ongl_projets" data-toggle="tab">Projets</a></li>
 			<li><a href="#ongl_dj_prep_real" data-toggle="tab">Demi-journées de préparation et de réalisation</a></li>
 		</ul>
 		<div class="tab-content">
@@ -25,12 +25,12 @@
 					{{ attrs_marche.prest }}
 				</div>
 			</div>
-			<div id="ongl_anim" class="fade tab-pane">
-				<form action="?action=choisir-prestataire&onglet=anim" method="post" name="form_chois_pm__anim" onsubmit="ajax(event);">
+			<div id="ongl_projets" class="fade tab-pane">
+				<form action="?action=choisir-prestataire&onglet=projet" method="post" name="form_chois_pm__projet" onsubmit="ajax(event);">
 					{% csrf_token %}
-					{{ forms_chois_pm.anim.zl_prest }}
+					{{ forms_chois_pm.projet.zl_prest }}
 				</form>
-				{{ dtables_chois_pm.anim | safe }}
+				{{ dtables_chois_pm.projet | safe }}
 			</div>
 			<div id="ongl_dj_prep_real" class="fade tab-pane">
 				<form action="?action=choisir-prestataire&onglet=gest_prep_real" method="post" name="form_chois_pm__gest_prep_real" onsubmit="ajax(event);">
@@ -41,8 +41,10 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-sm-3">
+	<div class="br-sm col-sm-3">
 		<a href="{% url 'modif_marche' %}?id={{ m.get_pk }}" class="icon-with-text modify-icon">Modifier le marché</a>
+		<br/>
+		<span action="?action=supprimer-marche-etape-1" class="delete-icon icon-with-text" modal-suffix="suppr_marche" onclick="ajax(event);">Supprimer le marché</span>
 	</div>
 </div>
 {% endblock content %}

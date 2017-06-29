@@ -12,6 +12,7 @@ class TTypeUtilisateur(models.Model) :
 
 	class Meta :
 		db_table = 't_type_utilisateur'
+		ordering = ['int_type_util']
 		verbose_name = verbose_name_plural = 'T_TYPE_UTILISATEUR'
 
 	# Getters
@@ -66,6 +67,7 @@ class TUtilisateur(User) :
 
 	class Meta :
 		db_table = 't_utilisateur'
+		ordering = ['username']
 		verbose_name = verbose_name_plural = 'T_UTILISATEUR'
 
 	# Getters
@@ -109,7 +111,6 @@ class TUtilisateur(User) :
 		else :
 			output = -1
 		return output
-	def get_is_superadmin(self) : return True if self.get_is_staff() and self.get_is_superuser() else False
 
 	def get_menu(self) :
 
@@ -120,7 +121,8 @@ class TUtilisateur(User) :
 
 		# Définition des modules accessibles par l'utilisateur
 		for cle, val in MENU.items() :
-			if set(self.get_type_util__list()).intersection(val['mod_rights']) : output[cle] = val
+			if val['mod_rights'] == '__ALL__' or set(self.get_type_util__list()).intersection(val['mod_rights']) :
+				output[cle] = val
 
 		# Tri des modules par ordre d'affichage
 		output = dict(sorted(output.items(), key = lambda l : l[1]['mod_rank']))
@@ -216,11 +218,29 @@ class TPrestatairesMarche(models.Model) :
 	def get_nbre_dj_pp_pm(self) : return self.nbre_dj_pp_pm
 
 	# Autres getters
+	def get_projet(self) : return self.tprojet_set
 	def get_tdj(self) : return self.ttransactiondemijournees_set
 
 	# Méthodes
 	def get_nbre_dj_ap_pm__str(self) : return '{0:g}'.format(self.get_nbre_dj_ap_pm())
 	def get_nbre_dj_pp_pm__str(self) : return '{0:g}'.format(self.get_nbre_dj_pp_pm())
+	def get_nbre_dj_progr_pm(self, _ti, _str = True) :
+		vals = []
+		for p in self.get_projet().all() :
+			if p.get_type_interv().get_pk() == _ti :
+				for a in p.get_anim().all() : vals.append(a.get_nbre_dj_anim())
+		output = sum(vals)
+		return '{0:g}'.format(output) if _str == True else output
+	def get_nbre_dj_prep_real_pm(self, _str = True) :
+		output = sum([tdj.get_nbre_dj_tdj() for tdj in self.get_tdj().all()])
+		return '{0:g}'.format(output) if _str == True else output
+	def get_nbre_dj_ap_rest_pm(self, _str = True) :
+		output = self.get_nbre_dj_ap_pm() - \
+		(self.get_nbre_dj_progr_pm('AP', False) + self.get_nbre_dj_prep_real_pm(False))
+		return '{0:g}'.format(output) if _str == True else output
+	def get_nbre_dj_pp_rest_pm(self, _str = True) :
+		output = self.get_nbre_dj_pp_pm() - self.get_nbre_dj_progr_pm('PP', False)
+		return '{0:g}'.format(output) if _str == True else output
 
 	def __str__(self) : return '{} - {}'.format(self.get_prest(), self.get_marche())
 
@@ -240,6 +260,7 @@ class TTransactionDemiJournees(models.Model) :
 
 	class Meta :
 		db_table = 't_transaction_demi_journees'
+		ordering = ['int_tdj']
 		verbose_name = verbose_name_plural = 'T_TRANSACTION_DEMI_JOURNEES'
 
 	# Getters
@@ -348,6 +369,7 @@ class TTypePublic(models.Model) :
 
 	def __str__(self) : return self.get_int_type_public()
 
+
 class TEcole(models.Model) :
 
 	# Attributs
@@ -357,6 +379,7 @@ class TEcole(models.Model) :
 
 	class Meta :
 		db_table = 't_ecole'
+		ordering = ['nom_ecole']
 		verbose_name = verbose_name_plural = 'T_ECOLE'
 
 	# Getters
@@ -387,10 +410,21 @@ class TClasse(models.Model) :
 
 class TProjet(models.Model) :
 
+	# Import
+	from django.core.validators import RegexValidator
+
 	# Attributs
 	id_projet = models.AutoField(primary_key = True)
 	comm_projet = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
+	courr_refer_projet = models.EmailField(verbose_name = 'Courriel du contact référent')
 	int_projet = models.CharField(max_length = 255, verbose_name = 'Intitulé du projet')
+	nom_refer_projet = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
+	prenom_refer_projet = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
+	tel_refer_projet = models.CharField(
+		max_length = 10,
+		validators = [RegexValidator(r'^[0-9]{10}')],
+		verbose_name = 'Numéro de téléphone du contact référent'
+	)
 	id_org = models.ForeignKey(TOrganisme, on_delete = models.CASCADE)
 	id_pm = models.ForeignKey(TPrestatairesMarche, null = True, on_delete = models.CASCADE)
 	id_sti = models.ForeignKey(TSousTypeIntervention, null = True, on_delete = models.CASCADE)
@@ -404,34 +438,74 @@ class TProjet(models.Model) :
 	# Getters
 	def get_pk(self) : return self.pk
 	def get_comm_projet(self) : return self.comm_projet
+	def get_courr_refer_projet(self) : return self.courr_refer_projet
 	def get_int_projet(self) : return self.int_projet
+	def get_nom_refer_projet(self) : return self.nom_refer_projet
+	def get_prenom_refer_projet(self) : return self.prenom_refer_projet
+	def get_tel_refer_projet(self) : return self.tel_refer_projet
 	def get_org(self) : return self.id_org
 	def get_pm(self) : return self.id_pm
 	def get_sti(self) : return self.id_sti
 	def get_type_public(self) : return self.id_type_public
 
 	# Autres getters
+	def get_anim(self) : return self.tanimation_set
 	def get_cep(self) : return self.tclassesecoleprojet_set
+	def get_ta(self) : return self.ttrancheage_set
 
 	# Méthodes
 	def get_attrs_projet(self, _pdf = False) :
 
-		# Import
+		# Imports
 		from app.functions.attributes_init import sub
+		from django.core.urlresolvers import reverse
 
 		# Initialisation des attributs du projet
 		attrs = {
+			'anims' : {
+				'label' : 'Animation(s)',
+				'value' : [[
+					a.get_projet().get_org(),
+					a.get_dt_heure_anim__str(),
+					a.get_nat_anim(),
+					a.get_lieu_anim(),
+					a.get_comm(),
+					'''
+					<a href="{}" class="inform-icon pull-right" title="Consulter l\'animation"></a>
+					'''.format(reverse('consult_anim', args = [a.get_pk()]))
+				] for a in self.get_anim().all()],
+				'table' : True,
+				'table_header' : [[
+					['Organisme', None],
+					['Date et heure de l\'animation', None],
+					['Nature de l\'animation', None],
+					['Lieu de l\'animation', None],
+					['Commune accueillant l\'animation', None],
+					['', None]
+				]]
+			},
 			'comm_projet' : { 'label' : 'Commentaire', 'value' : self.get_comm_projet() },
+			'courr_refer_projet' : { 
+				'label' : 'Courriel du contact référent', 'value' : self.get_courr_refer_projet()
+			},
 			'int_projet' : { 'label' : 'Intitulé du projet', 'value' : self.get_int_projet() },
 			'marche' : { 'label' : 'Marché', 'value' : self.get_pm().get_marche() if self.get_pm() else None },
 			'org' : { 'label' : 'Organisme', 'value' : self.get_org() },
+			'refer_projet' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
 			'sti' : { 'label' : 'Événement', 'value' : self.get_sti() },
+			'tel_refer_projet' : {
+				'label' : 'Numéro de téléphone du contact référent',
+				'value' : self.get_tel_refer_projet__deconstructed()
+			},
 			'type_interv' : { 'label' : 'Type d\'intervention', 'value' : self.get_type_interv() },
 			'type_public' : { 'label' : 'Type de public visé', 'value' : self.get_type_public() }
 		}
 
 		return sub(attrs, _pdf)
 
+	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_refer_projet(), self.get_prenom_refer_projet())
+	def get_tel_refer_projet__deconstructed(self) :
+		t = iter(self.get_tel_refer_projet()); return '-'.join(a + b for a, b in zip(t, t))
 	def get_type_interv(self) :
 		from app.models import TTypeIntervention
 		return self.get_sti().get_type_interv() if self.get_sti() else TTypeIntervention.objects.get(pk = 'AP')
@@ -447,17 +521,10 @@ class TClassesEcoleProjet(models.Model) :
 	id_classe = models.ForeignKey(TClasse, on_delete = models.CASCADE, verbose_name = 'Classe')
 	id_ecole = models.ForeignKey(TEcole, on_delete = models.CASCADE, verbose_name = 'Établissement scolaire')
 	id_projet = models.ForeignKey(TProjet, on_delete = models.CASCADE)
-	courr_refer_cep = models.EmailField(verbose_name = 'Courriel du contact référent')
-	nom_refer_cep = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
-	prenom_refer_cep = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
-	tel_refer_cep = models.CharField(
-		max_length = 10,
-		validators = [RegexValidator(r'^[0-9]{10}')],
-		verbose_name = 'Numéro de téléphone du contact référent'
-	)
 
 	class Meta :
 		db_table = 't_classes_ecole_projet'
+		ordering = ['id_classe', 'id_ecole']
 		verbose_name = verbose_name_plural = 'T_CLASSES_ECOLE_PROJET'
 
 	# Getters
@@ -465,35 +532,37 @@ class TClassesEcoleProjet(models.Model) :
 	def get_classe(self) : return self.id_classe
 	def get_ecole(self) : return self.id_ecole
 	def get_projet(self) : return self.id_projet
-	def get_courr_refer_cep(self) : return self.courr_refer_cep
-	def get_nom_refer_cep(self) : return self.nom_refer_cep
-	def get_prenom_refer_cep(self) : return self.prenom_refer_cep
-	def get_tel_refer_cep(self) : return self.tel_refer_cep
-
-	# Méthodes
-	def get_attrs_cep(self, _pdf = False) :
-
-		# Import
-		from app.functions.attributes_init import sub
-
-		# Initialisation des attributs de la classe
-		attrs = {
-			'courr_refer_cep' : { 'label' : 'Courriel du contact référent', 'value' : self.get_courr_refer_cep() },
-			'id_classe' : { 'label' : 'Classe', 'value' : self.get_classe() },
-			'id_ecole' : { 'label' : 'Établissement scolaire', 'value' : self.get_ecole() },
-			'refer_cep' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
-			'tel_refer_cep' : {
-				'label' : 'Numéro de téléphone du contact référent', 'value' : self.get_tel_refer_cep__deconstructed()
-			}
-		}
-
-		return sub(attrs, _pdf)
-
-	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_refer_cep(), self.get_prenom_refer_cep())
-	def get_tel_refer_cep__deconstructed(self) :
-		t = iter(self.get_tel_refer_cep()); return '-'.join(a + b for a, b in zip(t, t))
 
 	def __str__(self) : return '{} - {} - {}'.format(self.get_projet(), self.get_classe(), self.get_ecole())
+
+class TTrancheAge(models.Model) :
+
+	# Attributs
+	id_ta = models.AutoField(primary_key = True)
+	int_struct_ta = models.CharField(max_length = 255, verbose_name = 'Structure d\'accueil')
+	min_ta = models.PositiveIntegerField(verbose_name = 'Âge minimum')
+	max_ta = models.PositiveIntegerField(verbose_name = 'Âge maximum')
+	id_projet = models.ForeignKey(TProjet, on_delete = models.CASCADE)
+
+	class Meta :
+		db_table = 't_tranche_age'
+		ordering = ['min_ta', 'max_ta', 'int_struct_ta']
+		verbose_name = verbose_name_plural = 'T_TRANCHE_AGE'
+
+	# Getters
+	def get_pk(self) : return self.pk
+	def get_int_struct_ta(self) : return self.int_struct_ta
+	def get_min_ta(self) : return self.min_ta
+	def get_max_ta(self) : return self.max_ta
+	def get_projet(self) : return self.id_projet
+
+	def __str__(self) :
+		return '{} - {} - ({}-{} ans)'.format(
+			self.get_projet(),
+			self.get_int_struct_ta(),
+			self.get_min_ta(),
+			self.get_max_ta()
+		)
 
 class TAnimation(models.Model) :
 
@@ -503,18 +572,22 @@ class TAnimation(models.Model) :
 
 	# Attributs
 	id_anim = models.AutoField(primary_key = True)
-	dt_anim = models.DateField()
-	est_anim = models.BooleanField()
+	dt_anim = models.DateField(verbose_name = 'Date de l\'animation')
+	est_anim = models.BooleanField(default = True, verbose_name = 'L\'animation est-elle un rendez-vous ?')
 	heure_anim = ArrayField(base_field = models.TimeField(), size = 2)
-	lieu_anim = models.CharField(max_length = 255)
-	nbre_dj_anim = models.FloatField(choices = [(elem, str(elem)) for elem in HALF_DAY_CHOICES])
-	num_anim = models.PositiveIntegerField(blank = True, null = True)
+	lieu_anim = models.CharField(max_length = 255, verbose_name = 'Lieu de l\'animation')
+	nbre_dj_anim = models.FloatField(
+		choices = [(elem, str(elem)) for elem in HALF_DAY_CHOICES],
+		verbose_name = 'Nombre de demi-journées déduites'
+	)
+	num_anim = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Numéro de l\'animation')
 	code_comm = models.ForeignKey(TCommune, on_delete = models.CASCADE)
-	id_projet = models.ForeignKey(TProjet, on_delete = models.CASCADE)
-	id_struct = models.ForeignKey(TStructure, on_delete = models.CASCADE)
+	id_projet = models.ForeignKey(TProjet, on_delete = models.CASCADE, verbose_name = 'Projet')
+	id_struct = models.ForeignKey(TStructure, on_delete = models.CASCADE, verbose_name = 'Structure d\'accueil')
 
 	class Meta :
 		db_table = 't_animation'
+		ordering = ['dt_anim', 'heure_anim']
 		verbose_name = verbose_name_plural = 'T_ANIMATION'
 
 	# Getters
@@ -529,26 +602,62 @@ class TAnimation(models.Model) :
 	def get_projet(self) : return self.id_projet
 	def get_struct(self) : return self.id_struct
 
+	# Autres getters
+	def get_bilan(self) : return self.tbilan_set
+
 	# Méthodes
-	def get_est_anim__str(self) : return 'Anim' if self.get_est_anim() == True else 'RDV'
+	def get_attrs_anim(self, _pdf = False) :
+
+		# Import
+		from app.functions.attributes_init import sub
+
+		return sub({
+			'comm' : { 'label' : 'Commune accueillant l\'animation', 'value' : self.get_comm() },
+			'dt_heure_anim' : { 'label' : 'Date et heure de l\'animation', 'value' : self.get_dt_heure_anim__str() },
+			'lieu_anim' : { 'label' : 'Lieu de l\'animation', 'value' : self.get_lieu_anim() },
+			'nat_anim' : { 'label' : 'Nature de l\'animation', 'value' : self.get_nat_anim() },
+			'nbre_dj_anim' : { 'label' : 'Nombre de demi-journées déduites', 'value' : self.get_nbre_dj_anim__str() },
+			'prest' : { 'label' : 'Organisme', 'value' : self.get_projet().get_org() },
+			'struct' : { 'label' : 'Structure d\'accueil', 'value' : self.get_struct() },
+			'projet' : { 'label' : 'Projet', 'value' : self.get_projet() }
+		}, _pdf)
+
+	def get_bilan__object(self) : return self.get_bilan().get() if self.get_bilan().count() > 0 else None
+	def get_dt_anim__str(self) :
+		from app.functions.get_local_format import sub; return sub(self.get_dt_anim())
+	def get_dt_heure_anim__str(self) :
+		return '{} {}'.format(self.get_dt_anim__str(), '-'.join(self.get_heure_anim__str()))
+	def get_nat_anim(self) :
+		return 'Anim {}'.format(self.get_num_anim()) if self.get_est_anim() == True else 'RDV'
+	def get_nbre_dj_anim__str(self) : return '{0:g}'.format(self.get_nbre_dj_anim())
 	def get_heure_anim__str(self) :
-		from app.functions.get_local_format import sub; return [sub(elem)[1] for elem in self.get_heure_anim()]
+		from app.functions.get_local_format import sub; return [sub(elem) for elem in self.get_heure_anim() if elem]
 
 	def __str__(self) : 
 		return '{} : {} {} ({})'.format(
 			'-'.join(self.get_heure_anim__str()),
-			self.get_est_anim__str(),
-			self.get_comm().get_nom_comm(),
-			self.get_lieu_anim()
+			self.get_nat_anim(),
+			self.get_lieu_anim(),
+			self.get_comm().get_nom_comm()
 		)
 
 class TBilan(models.Model) :
 
 	# Attributs
 	id_bilan = models.AutoField(primary_key = True)
-	comm_bilan = models.TextField(blank = True, null = True)
-	nbre_pers_pres_bilan = models.PositiveIntegerField()
-	nbre_pers_prev_bilan = models.PositiveIntegerField(blank = True, null = True)
+	comm_bilan = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
+	fonct_refer_bilan = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Fonction du contact référent de l\'animation'
+	)
+	nom_refer_bilan = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Nom de famille du contact référent de l\'animation'
+	)
+	prenom_refer_bilan = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent de l\'animation'
+	)
+	struct_refer_bilan = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Structure du contact référent de l\'animation'
+	)
 	id_anim = models.ForeignKey(TAnimation, on_delete = models.CASCADE)
 	id_util = models.ForeignKey(TUtilisateur, on_delete = models.CASCADE)
 
@@ -559,10 +668,40 @@ class TBilan(models.Model) :
 	# Getters
 	def get_pk(self) : return self.pk
 	def get_comm_bilan(self) : return self.comm_bilan
-	def get_nbre_pers_pres_bilan(self) : return self.nbre_pers_pres_bilan
-	def get_nbre_pers_prev_bilan(self) : return self.nbre_pers_prev_bilan
+	def get_fonct_refer_bilan(self) : return self.fonct_refer_bilan
+	def get_nom_refer_bilan(self) : return self.nom_refer_bilan
+	def get_prenom_refer_bilan(self) : return self.prenom_refer_bilan
+	def get_struct_refer_bilan(self) : return self.struct_refer_bilan
 	def get_anim(self) : return self.id_anim
 	def get_util(self) : return self.id_util
+
+	# Autres getters
+	def get_ba(self) : return self.tbilananimation if hasattr(self, 'tbilananimation') else None
+
+	# Méthodes
+	def get_attrs_bilan(self, _pdf = False, _initial_dict = False) :
+
+		# Import
+		from app.functions.attributes_init import sub
+
+		attrs_bilan = {
+			'anim' : { 'label' : 'Animation', 'value' : self.get_anim() },
+			'comm_bilan' : { 'label' : 'Commentaire', 'value' : self.get_comm_bilan() },
+			'fonct_refer_bilan' : { 'label' : 'Fonction du contact référent', 'value' : self.get_fonct_refer_bilan() },
+			'org' : { 'label' : 'Organisme', 'value' : self.get_util().get_org() },
+			'refer_bilan' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
+			'struct_refer_bilan' : {
+				'label' : 'Structure du contact référent', 'value' : self.get_fonct_refer_bilan()
+			},
+			'util' : {
+				'label' : 'Utilisateur ayant effectué la dernière modification',
+				'value' : self.get_util().get_nom_complet()
+			}
+		}
+
+		return sub(attrs_bilan, _pdf) if _initial_dict == False else attrs_bilan
+
+	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_refer_bilan(), self.get_prenom_refer_bilan())
 
 	def __str__(self) : return '{} [BILAN]'.format(self.get_anim())
 
@@ -596,6 +735,7 @@ class TPlaquette(models.Model) :
 
 	class Meta :
 		db_table = 't_plaquette'
+		ordering = ['int_plaq']
 		verbose_name = verbose_name_plural = 'T_PLAQUETTE'
 
 	# Getters
@@ -604,23 +744,32 @@ class TPlaquette(models.Model) :
 	def get_miniat_plaq(self) : return self.miniat_plaq
 	def get_pdf_plaq(self) : return self.pdf_plaq
 
-	# Méthode
-	def get_plaq__a_img(self, _a_kwargs = {}, _img_kwargs = {}) :
+	# Méthodes
+	def get_miniat_plaq__img(self, _kwargs = {}) :
 
 		# Import
 		from django.conf import settings
 
 		# Initialisation des arguments
-		a_kwargs = {}
-		for cle, val in  _a_kwargs.items() : a_kwargs[cle] = val
-		a_kwargs['href'] = '{}{}'.format(settings.MEDIA_URL, self.get_pdf_plaq())
-		img_kwargs = {}
-		for cle, val in  _img_kwargs.items() : img_kwargs[cle] = val
-		img_kwargs['src'] = '{}{}'.format(settings.MEDIA_URL, self.get_miniat_plaq())
+		kwargs = {}
+		for cle, val in _kwargs.items() : kwargs[cle] = val
+		kwargs['src'] = '{}{}'.format(settings.MEDIA_URL, self.get_miniat_plaq())
 
-		return '<a {}><img {}/></a>'.format(
+		return '<img {}/>'.format(' '.join(['{}="{}"'.format(cle, val) for cle, val in kwargs.items()]))
+
+	def get_plaq__a_img(self, _a_kwargs = {}, _img_kwargs = {}) :
+
+		# Import
+		from django.conf import settings
+
+		# Initialisation des arguments de la balise <a/>
+		a_kwargs = {}
+		for cle, val in _a_kwargs.items() : a_kwargs[cle] = val
+		a_kwargs['href'] = '{}{}'.format(settings.MEDIA_URL, self.get_pdf_plaq())
+
+		return '<a {}>{}</a>'.format(
 			' '.join(['{}="{}"'.format(cle, val) for cle, val in a_kwargs.items()]),
-			' '.join(['{}="{}"'.format(cle, val) for cle, val in img_kwargs.items()])
+			self.get_miniat_plaq__img(_img_kwargs)
 		)
 
 	def __str__(self) : return self.get_int_plaq()
@@ -631,6 +780,8 @@ class TPlaquette(models.Model) :
 class TBilanAnimation(TBilan) :
 
 	# Import
+	from app.validators import valid_fich
+	from app.validators import valid_pdf
 	from smmaranim.custom_settings import EVALUATION_CHOICES
 
 	# Méthodes liées aux attributs
@@ -643,23 +794,71 @@ class TBilanAnimation(TBilan) :
 		return 'animations/revues_de_presse/{}.{}'.format(sub(), _fn.split('.')[-1])
 
 	# Attributs
-	deroul_ba = models.TextField(blank = True, null = True)
-	en_exter = models.BooleanField()
-	en_inter = models.BooleanField()
-	eval_ba = models.CharField(choices = [(elem, elem) for elem in EVALUATION_CHOICES], max_length = 4)
-	outil_ba = models.FileField(blank = True, null = True, upload_to = set_outil_ba__upload_to)
-	photo_1_ba = models.ImageField(blank = True, null = True, upload_to = set_photo_ba__upload_to)
-	photo_2_ba = models.ImageField(blank = True, null = True, upload_to = set_photo_ba__upload_to)
-	photo_3_ba = models.ImageField(blank = True, null = True, upload_to = set_photo_ba__upload_to)
-	rdp_1_ba = models.FileField(blank = True, null = True, upload_to = set_rdp_ba__upload_to)
-	rdp_2_ba = models.FileField(blank = True, null = True, upload_to = set_rdp_ba__upload_to)
-	rdp_3_ba = models.FileField(blank = True, null = True, upload_to = set_rdp_ba__upload_to)
-	themat_abord_ba = models.TextField(blank = True, null = True)
-	theme_ba = models.CharField(max_length = 255)
-	titre_ba = models.CharField(blank = True, max_length = 255, null = True)
+	deroul_ba = models.TextField(verbose_name = 'Déroulement et méthodes adoptées')
+	en_exter = models.BooleanField(default = False, verbose_name = 'Y a-t-il eu des activités en extérieur ?')
+	en_inter = models.BooleanField(default = False, verbose_name = 'Y a-t-il eu des activités en intérieur ?')
+	eval_ba = models.CharField(
+		choices = [(elem, elem) for elem in EVALUATION_CHOICES],
+		default = 'TOP',
+		max_length = 4,
+		verbose_name = 'Évaluation de l\'animation'
+	)
+	nbre_pers_pres_ba = models.PositiveIntegerField(verbose_name = 'Nombre de personnes présentes à l\'animation')
+	nbre_pers_prev_ba = models.PositiveIntegerField(verbose_name = 'Nombre de personnes prévues à l\'animation')
+	outil_ba = models.FileField(
+		blank = True,
+		null = True,
+		upload_to = set_outil_ba__upload_to,
+		validators = [valid_fich],
+		verbose_name = 'Outil créé spécialement pour l\'animation'
+	)
+	photo_1_ba = models.ImageField(
+		blank = True,
+		null = True,
+		upload_to = set_photo_ba__upload_to,
+		validators = [valid_fich],
+		verbose_name = 'Photo 1 de l\'animation'
+	)
+	photo_2_ba = models.ImageField(
+		blank = True,
+		null = True,
+		upload_to = set_photo_ba__upload_to,
+		validators = [valid_fich],
+		verbose_name = 'Photo 2 de l\'animation'
+	)
+	photo_3_ba = models.ImageField(
+		blank = True,
+		null = True,
+		upload_to = set_photo_ba__upload_to,
+		validators = [valid_fich],
+		verbose_name = 'Photo 3 de l\'animation'
+	)
+	rdp_1_ba = models.FileField(
+		blank = True,
+		null = True,
+		upload_to = set_rdp_ba__upload_to,
+		validators = [valid_fich, valid_pdf],
+		verbose_name = 'Revue de presse 1 de l\'animation <span class="fl-complement">(fichier PDF)</span>'
+	)
+	rdp_2_ba = models.FileField(
+		blank = True,
+		null = True,
+		upload_to = set_rdp_ba__upload_to,
+		validators = [valid_fich, valid_pdf],
+		verbose_name = 'Revue de presse 2 de l\'animation <span class="fl-complement">(fichier PDF)</span>'
+	)
+	rdp_3_ba = models.FileField(
+		blank = True,
+		null = True,
+		upload_to = set_rdp_ba__upload_to,
+		validators = [valid_fich, valid_pdf],
+		verbose_name = 'Revue de presse 3 de l\'animation <span class="fl-complement">(fichier PDF)</span>'
+	)
+	themat_abord_ba = models.TextField(verbose_name = 'Thématiques abordées')
+	theme_ba = models.CharField(max_length = 255, verbose_name = 'Thème de l\'animation')
+	titre_ba = models.CharField(max_length = 255, verbose_name = 'Titre de l\'animation')
 
-	# Relations
-	cep = models.ManyToManyField(TClassesEcoleProjet, through = 'TElevesClasseEcoleProjet')
+	# Relation
 	plaq = models.ManyToManyField(TPlaquette, through = 'TPlaquettesDistribuees')
 
 	class Meta :
@@ -673,6 +872,8 @@ class TBilanAnimation(TBilan) :
 	def get_en_exter(self) : return self.en_exter
 	def get_en_inter(self) : return self.en_inter
 	def get_eval_ba(self) : return self.eval_ba
+	def get_nbre_pers_pres_ba(self) : return self.nbre_pers_pres_ba
+	def get_nbre_pers_prev_ba(self) : return self.nbre_pers_prev_ba
 	def get_outil_ba(self) : return self.outil_ba
 	def get_photo_1_ba(self) : return self.photo_1_ba
 	def get_photo_2_ba(self) : return self.photo_2_ba
@@ -685,35 +886,130 @@ class TBilanAnimation(TBilan) :
 	def get_theme_ba(self) : return self.theme_ba
 	def get_titre_ba(self) : return self.titre_ba
 
-	def __str__(self) : return 'TODO'
+	# Autres getters
+	def get_bilan(self) : return self.id_bilan
+	def get_pd(self) : return self.tplaquettesdistribuees_set
+	def get_point(self) : return self.tpoint_set
 
-class TElevesClasseEcoleProjet(models.Model) :
+	# Méthodes
+	def get_attrs_ba(self, _pdf = False) :
 
-	# Attributs
-	id_ba = models.ForeignKey(TBilanAnimation, on_delete = models.CASCADE)
-	id_cep = models.ForeignKey(TClassesEcoleProjet, on_delete = models.CASCADE)
-	nbre_eleves_pres_ecep = models.PositiveIntegerField()
-	nbre_eleves_prev_ecep = models.PositiveIntegerField()
+		# Imports
+		from app.functions.attributes_init import sub as attributes_init
+		from app.functions.transform_bool import sub as transform_bool
 
-	class Meta :
-		db_table = 't_eleves_classe_ecole_projet'
-		verbose_name = verbose_name_plural = 'T_ELEVES_CLASSE_ECOLE_PROJET'
+		attrs_ba = self.get_attrs_bilan(_pdf, True)
+		attrs_ba['deroul_ba'] = { 'label' : 'Déroulement de l\'animation', 'value' : self.get_deroul_ba() }
+		attrs_ba['en_exter'] = {
+			'label' : 'Y a-t-il eu des activités en extérieur ?', 'value' : transform_bool(self.get_en_exter())
+		}
+		attrs_ba['en_inter'] = {
+			'label' : 'Y a-t-il eu des activités en intérieur ?', 'value' : transform_bool(self.get_en_inter())
+		}
+		attrs_ba['eval_ba'] = { 'label' : 'Évaluation de l\'animation', 'value' : self.get_eval_ba() }
+		attrs_ba['nbre_pers_pres_ba'] = {
+			'label' : 'Nombre de personnes présentes à l\'animation', 'value' : self.get_nbre_pers_pres_ba()
+		}
+		attrs_ba['nbre_pers_prev_ba'] = {
+			'label' : 'Nombre de personnes prévues à l\'animation', 'value' : self.get_nbre_pers_prev_ba()
+		}
+		attrs_ba['outil_ba'] = {
+			'download' : True,
+			'label' : 'Télécharger l\'outil créé spécialement pour l\'animation',
+			'value' : self.get_outil_ba__href()
+		}
+		attrs_ba['photo_ba'] = {
+			'label' : 'Photo(s) de l\'animation',
+			'row' : True,
+			'value' : self.get_photo_ba__img_list({ 'style' : 'width: 100%;' })
+		}
+		attrs_ba['plaq'] = {
+			'label' : 'Plaquette(s) distribuée(s)',
+			'value' : [[
+				elem.get_plaq__a_img({ 'target' : 'blank', 'title' : 'Afficher la plaquette' }, { 'height' : 40 }),
+				elem.get_int_plaq()
+			] for elem in self.get_plaq().all()],
+			'table' : True,
+			'table_header' : [[['Aperçu de la plaquette', None], ['Intitulé de la plaquette', None]]]
+		}
+		attrs_ba['point'] = {
+			'label' : 'Point(s) positif(s)/négatif(s) de l\'animation',
+			'value' : [[
+				elem.get_int_point(),
+				elem.get_comm_pos_point() or '-' if _pdf == True else '',
+				elem.get_comm_neg_point() or '-' if _pdf == True else ''
+			] for elem in self.get_point().all()],
+			'table' : True,
+			'table_header' : [
+				[['Intitulé de l\'action', 'rowspan:2'], ['Commentaire', 'colspan:2']],
+				[['Positif', None], ['Négatif', None]]
+			]
+		}
+		attrs_ba['rdp_1_ba'] = {
+			'label' : 'Consulter la revue de presse 1 de l\'animation',
+			'pdf' : True,
+			'value' : self.get_rdp_1_ba__href()
+		}
+		attrs_ba['rdp_2_ba'] = {
+			'label' : 'Consulter la revue de presse 2 de l\'animation',
+			'pdf' : True,
+			'value' : self.get_rdp_2_ba__href()
+		}
+		attrs_ba['rdp_3_ba'] = {
+			'label' : 'Consulter la revue de presse 3 de l\'animation',
+			'pdf' : True,
+			'value' : self.get_rdp_3_ba__href()
+		}
+		attrs_ba['themat_abord_ba'] = { 'label' : 'Thématiques abordées', 'value' : self.get_themat_abord_ba() }
+		attrs_ba['theme_ba'] = { 'label' : 'Thème de l\'animation', 'value' : self.get_theme_ba() }
+		attrs_ba['titre_ba'] = { 'label' : 'Titre de l\'animation', 'value' : self.get_titre_ba() }
 
-	# Getters
-	def get_pk(self) : return self.pk
-	def get_ba(self) : return self.id_ba
-	def get_cep(self) : return self.id_cep
-	def get_nbre_eleves_pres_ecep(self) : return self.nbre_eleves_pres_ecep
-	def get_nbre_eleves_prev_ecep(self) : return self.nbre_eleves_prev_ecep
+		return attributes_init(attrs_ba, _pdf)
 
-	def __str__(self) : return 'TODO'
+	def get_outil_ba__href(self) :
+		from django.conf import settings
+		return '{}{}'.format(settings.MEDIA_URL, self.get_outil_ba()) if self.get_outil_ba() else None
+	def get_photo_ba__img_list(self, _kwargs = {}) :
+
+		# Import
+		from django.conf import settings
+
+		output = []
+
+		# Stockage des chemins
+		paths = [elem for elem in [self.get_photo_1_ba(), self.get_photo_2_ba(), self.get_photo_3_ba()] if elem]
+
+		# Initialisation des arguments
+		kwargs = {}
+		for cle, val in _kwargs.items() : kwargs[cle] = val
+
+		for p in paths :
+
+			# Surchargement des arguments
+			kwargs['src'] = '{}{}'.format(settings.MEDIA_URL, p)
+
+			# Empilement des photos
+			output.append('<img {}/>'.format(' '.join(['{}="{}"'.format(cle, val) for cle, val in kwargs.items()])))
+
+		return output
+
+	def get_rdp_1_ba__href(self) :
+		from django.conf import settings
+		return '{}{}'.format(settings.MEDIA_URL, self.get_rdp_1_ba()) if self.get_rdp_1_ba() else None
+	def get_rdp_2_ba__href(self) :
+		from django.conf import settings
+		return '{}{}'.format(settings.MEDIA_URL, self.get_rdp_2_ba()) if self.get_rdp_2_ba() else None
+	def get_rdp_3_ba__href(self) :
+		from django.conf import settings
+		return '{}{}'.format(settings.MEDIA_URL, self.get_rdp_3_ba()) if self.get_rdp_3_ba() else None
+
+	def __str__(self) : return self.get_bilan()
 
 class TPlaquettesDistribuees(models.Model) :
 
 	# Attributs
 	id_ba = models.ForeignKey(TBilanAnimation, on_delete = models.CASCADE)
 	id_plaq = models.ForeignKey(TPlaquette, on_delete = models.CASCADE)
-	nbre_plaq_distrib = models.PositiveIntegerField()
 
 	class Meta :
 		db_table = 't_plaquettes_distribuees'
@@ -723,24 +1019,22 @@ class TPlaquettesDistribuees(models.Model) :
 	def get_pk(self) : return self.pk
 	def get_ba(self) : return self.id_ba
 	def get_plaq(self) : return self.id_plaq
-	def get_nbre_plaq_distrib(self) : return self.nbre_plaq_distrib
 
 	def __str__(self) :
-		return '{} - {} ({} plaquette(s) distribuée(s))'.format(
-			self.get_ba().get_anim(), self.get_plaq(), self.get_nbre_plaq_distrib()
-		)
+		return '{} - {}'.format(self.get_ba().get_anim(), self.get_plaq())
 
 class TPoint(models.Model) :
 
 	# Attributs
 	id_point = models.AutoField(primary_key = True)
-	comm_neg_point = models.TextField(blank = True, null = True)
-	comm_pos_point = models.TextField(blank = True, null = True)
-	int_point = models.CharField(max_length = 255)
+	comm_neg_point = models.TextField(blank = True, null = True, verbose_name = 'Commentaire négatif')
+	comm_pos_point = models.TextField(blank = True, null = True, verbose_name = 'Commentaire positif')
+	int_point = models.CharField(max_length = 255, verbose_name = 'Intitulé')
 	id_ba = models.ForeignKey(TBilanAnimation, on_delete = models.CASCADE)
 
 	class Meta :
 		db_table = 't_point'
+		ordering = ['int_point']
 		verbose_name = verbose_name_plural = 'T_POINT'
 
 	# Getters
@@ -793,6 +1087,8 @@ class TOutil(models.Model) :
 
 	def __str__(self) : return self.get_int_outil()
 
+	def delete(self, *args, **kwargs) : self.get_photo_outil().delete(); super(TOutil, self).delete(*args, **kwargs)
+
 class TReservation(models.Model) :
 
 	# Imports
@@ -804,10 +1100,10 @@ class TReservation(models.Model) :
 	borne_dt_reserv = ArrayField(base_field = models.CharField(max_length = 2), size = 2)
 	comm_reserv = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
 	courr_refer_reserv = models.EmailField(verbose_name = 'Courriel du contact référent')
-	doit_chercher = models.BooleanField(default = 0, verbose_name = 'Le SMMAR doit-il chercher l\'outil ?')
-	doit_demonter = models.BooleanField(default = 0, verbose_name = 'Le SMMAR doit-il démonter l\'outil ?')
-	doit_livrer = models.BooleanField(default = 0, verbose_name = 'Le SMMAR doit-il livrer l\'outil ?')
-	doit_monter = models.BooleanField(default = 0, verbose_name = 'Le SMMAR doit-il monter l\'outil ?')
+	doit_chercher = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il chercher l\'outil ?')
+	doit_demonter = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il démonter l\'outil ?')
+	doit_livrer = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il livrer l\'outil ?')
+	doit_monter = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il monter l\'outil ?')
 	dt_emiss_reserv = models.DateTimeField(auto_now_add = True)
 	dt_reserv = ArrayField(base_field = models.DateField(), size = 2)
 	nom_refer_reserv = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
@@ -916,7 +1212,7 @@ class TReservation(models.Model) :
 			},
 			'dt_reserv' : { 'label' : 'Date(s) de réservation', 'value' : self.get_dt_reserv__fr_str() },
 			'nom_complet_refer_reserv' : {
-				'label' : 'Nom complet de la personne référente', 'value' : self.get_nom_complet()
+				'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet()
 			},
 			'org' : { 'label' : 'Organisme', 'value' : self.get_util().get_org() },
 			'outil' : { 'label' : 'Outil', 'value' : self.get_outil() },
@@ -974,6 +1270,7 @@ class TReferentReservation(models.Model) :
 	# Attributs
 	id_rr = models.AutoField(primary_key = True)
 	courr_rr = models.EmailField(verbose_name = 'Courriel du contact référent')
+	est_princ = models.BooleanField(default = False)
 	nom_rr = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
 	prenom_rr = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
 	tel_rr = models.CharField(
@@ -1025,6 +1322,7 @@ class TExposition(models.Model) :
 
 	class Meta :
 		db_table = 't_exposition'
+		ordering = ['dt_expos']
 		verbose_name = verbose_name_plural = 'T_EXPOSITION'
 
 	# Getters

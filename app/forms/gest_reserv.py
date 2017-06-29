@@ -32,14 +32,7 @@ class FiltrerReservation(forms.Form) :
 		self.fields['zl_outil'].choices += [(
 			o.get_pk(),
 			'|'.join([
-				o.get_photo_outil__img({
-					'action' : '?action=afficher-outil&id={}'.format(o.get_pk()),
-					'class' : 'center-block show-picture',
-					'height' : 40,
-					'modal-suffix' : 'affich_outil',
-					'onclick' : 'ajax(event);',
-					'title' : 'Afficher l\'outil'
-				}),
+				o.get_photo_outil__img({ 'class' : 'center-block', 'height' : 40 }),
 				o.get_int_outil(),
 				o.get_descr_outil(),
 				'__rb__'
@@ -56,7 +49,7 @@ class FiltrerReservation(forms.Form) :
 
 		# Imports
 		from app.models import TReservation
-		from app.models import TUtilisateur
+		#from app.models import TUtilisateur
 		from datetime import date
 		from smmaranim.custom_settings import MONTHS
 		import calendar
@@ -124,10 +117,12 @@ class FiltrerReservation(forms.Form) :
 									'title' : 'Consulter une partie de la réservation'
 								}
 
+								'''
 								# Ajout d'une classe CSS montrant que la réservation a été effectuée par un utilisateur
 								# partageant le même organisme que l'utilisateur connecté
 								if TUtilisateur.get_util_connect(_req).get_org() == r.get_util().get_org() :
 									div_attrs['class'] += ' made-by-myself'
+								'''
 
 								# Mise en forme d'un bloc réservation
 								div = '<div {}></div>'.format(
@@ -240,7 +235,15 @@ class GererReservation(forms.ModelForm) :
 			'doit_chercher' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
 			'doit_demonter' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
 			'doit_livrer' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
-			'doit_monter' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')])
+			'doit_monter' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
+			'quand_chercher' : forms.DateTimeInput(attrs = { 'may-be-required' : True }),
+			'quand_demonter' : forms.DateTimeInput(attrs = { 'may-be-required' : True }),
+			'quand_livrer' : forms.DateTimeInput(attrs = { 'may-be-required' : True }),
+			'quand_monter' : forms.DateTimeInput(attrs = { 'may-be-required' : True }),
+			'ou_chercher' : forms.TextInput(attrs = { 'may-be-required' : True }),
+			'ou_demonter' : forms.TextInput(attrs = { 'may-be-required' : True }),
+			'ou_livrer' : forms.TextInput(attrs = { 'may-be-required' : True }),
+			'ou_monter' : forms.TextInput(attrs = { 'may-be-required' : True }),
 		}
 
 	def __init__(self, *args, **kwargs) :
@@ -256,12 +259,15 @@ class GererReservation(forms.ModelForm) :
 
 		# Mise en forme de certaines données
 		if instance :
-			kwargs.update(initial = {
+			initial = {
 				'doit_chercher' : 0 if instance.get_doit_chercher() == False else 1,
 				'doit_demonter' : 0 if instance.get_doit_demonter() == False else 1,
 				'doit_livrer' : 0 if instance.get_doit_livrer() == False else 1,
 				'doit_monter' : 0 if instance.get_doit_monter() == False else 1
-			})
+			}
+		else :
+			initial = { 'doit_chercher' : 0, 'doit_demonter' : 0, 'doit_livrer' : 0, 'doit_monter' : 0 }
+		kwargs.update(initial = { **initial })
 
 		super(GererReservation, self).__init__(*args, **kwargs)
 
@@ -389,6 +395,9 @@ class GererReservation(forms.ModelForm) :
 
 	def save(self, commit = True) :
 
+		# Import
+		from app.models import TReferentReservation
+
 		# Stockage des données du formulaire
 		cleaned_data = self.cleaned_data
 		val_dt_deb_reserv = cleaned_data.get('zd_dt_deb_reserv')
@@ -397,6 +406,10 @@ class GererReservation(forms.ModelForm) :
 		val_borne_dt_deb_reserv = cleaned_data.get('zl_borne_dt_deb_reserv')
 		val_borne_dt_fin_reserv = cleaned_data.get('zl_borne_dt_fin_reserv')
 		val_borne_dt_reserv = cleaned_data.get('zl_borne_dt_reserv')
+		val_nom_refer_reserv = cleaned_data.get('nom_refer_reserv')
+		val_prenom_refer_reserv = cleaned_data.get('prenom_refer_reserv')
+		val_courr_refer_reserv = cleaned_data.get('courr_refer_reserv')
+		val_tel_refer_reserv = cleaned_data.get('tel_refer_reserv')
 
 		# Initialisation de la valeur des attributs dt_reserv et borne_dt_reserv
 		if val_dt_reserv and val_borne_dt_reserv :
@@ -413,6 +426,22 @@ class GererReservation(forms.ModelForm) :
 		obj.dt_reserv = t['dt_reserv']
 		obj.id_util = self.kw_util
 		obj.save()
+
+		# Stockage des attributs du référent par défaut
+		attrs_rr = {
+			'courr_rr' : val_courr_refer_reserv,
+			'est_princ' : True,
+			'id_reserv' : obj,
+			'nom_rr' : val_nom_refer_reserv,
+			'prenom_rr' : val_prenom_refer_reserv,
+			'tel_rr' : val_tel_refer_reserv
+		}
+
+		# Lien avec la table t_referent_reservation (création d'un référent par défaut)
+		if obj.get_rr().count() == 0 :
+			TReferentReservation.objects.create(**attrs_rr)
+		else :
+			obj.get_rr().filter(est_princ = True).update(**attrs_rr)
 
 		return obj
 
@@ -488,9 +517,8 @@ class GererExposition(forms.ModelForm) :
 
 	def __init__(self, *args, **kwargs) :
 
-		# Imports
-		from app.models import TCommune
-		from smmaranim.custom_settings import DEPARTMENTS
+		# Import
+		from app.functions.get_communes import sub as get_communes
 
 		# Initialisation des arguments
 		kw_dt_expos = kwargs.pop('kw_dt_expos', None)
@@ -498,25 +526,8 @@ class GererExposition(forms.ModelForm) :
 
 		super(GererExposition, self).__init__(*args, **kwargs)
 
-		# Initialisation des communes
-		communes = [[c.get_pk(), c] for c in TCommune.objects.order_by('nom_comm')]
-
-		# Initialisation des communes par département
-		departs = sorted([[j for j in communes if j[0][:2] == i] for i in set(map(lambda l : l[0][:2], communes))])
-
-		# Initialisation des choix de la liste déroulante des communes
-		zl_comm__choices = []
-		for d in departs :
-
-			# Stockage du numéro du département
-			num = d[0][0][:2]
-
-			# Empilement des choix de la liste déroulante des communes par filtrage par rapport au numéro de
-			# département
-			if num in DEPARTMENTS.keys() : zl_comm__choices.append([DEPARTMENTS[num], [c for c in d]])
-
 		# Définition des choix de chaque liste déroulante
-		self.fields['zl_comm'].choices += zl_comm__choices
+		self.fields['zl_comm'].choices += get_communes()
 		self.fields['zl_rr'].queryset = self.kw_reserv.get_rr().all()
 
 		# Définition de la valeur initiale de chaque champ

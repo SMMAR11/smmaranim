@@ -159,11 +159,14 @@ def consult_marche(_req, _m) :
 	from app.functions.attributes_init import sub as attributes_init
 	from app.functions.datatable_reset import sub as datatable_reset
 	from app.functions.form_init import sub as form_init
-	from app.functions.formset_init import sub as formset_init
 	from app.functions.modal_init import sub as modal_init
 	from app.functions.yes_or_no import sub as yes_or_no
+	from app.models import TAnimation
 	from app.models import TMarche
 	from app.models import TPrestatairesMarche
+	from app.models import TProjet
+	from app.models import TTransactionDemiJournees
+	from django.core.urlresolvers import reverse
 	from django.forms import formset_factory
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
@@ -181,11 +184,11 @@ def consult_marche(_req, _m) :
 	# Initialisation du préfixe de chaque formulaire
 	prefix_ajout_pm = 'AjouterPrestataireMarche'
 	prefix_modif_pm = 'ModifierPrestataireMarche'
-	prefix_chois_pm__anim = 'ChoisirPrestataireMarche__Animations'
 	prefix_chois_pm__gest_prep_real = 'ChoisirPrestataireMarche__GestionPreparationEtRealisation'
+	prefix_chois_pm__projet = 'ChoisirPrestataireMarche__Projets'
 
 	# Initialisation du préfixe de chaque formulaire de choix d'un prestataire
-	prefixes_chois_pm = { 'anim' : prefix_chois_pm__anim, 'gest_prep_real' : prefix_chois_pm__gest_prep_real }
+	prefixes_chois_pm = { 'gest_prep_real' : prefix_chois_pm__gest_prep_real, 'projet' : prefix_chois_pm__projet }
 
 	if _req.method == 'GET' :
 		if 'action' in _req.GET :
@@ -261,6 +264,49 @@ def consult_marche(_req, _m) :
 				_req.session['ttransactiondemijournees__id_pm__update'] = obj_pm.get_pk()
 
 				output = GererTransactionDemiJournees(kw_pm = obj_pm).get_datatable(_req)
+
+			# Affichage d'une demande de suppression du marché
+			if _req.GET['action'] == 'supprimer-marche-etape-1' :
+
+				# Stockage du nombre de projets et d'animations susceptibles d'être supprimées en cascade
+				projets = TProjet.objects.filter(id_pm__in = [pm.get_pk() for pm in obj_marche.get_pm().all()])
+				anims = TAnimation.objects.filter(id_projet__in = [p.get_pk() for p in projets])
+				tdjs = TTransactionDemiJournees.objects.filter(
+					id_pm__in = [pm.get_pk() for pm in obj_marche.get_pm().all()]
+				)
+
+				# Affichage de la demande de suppression
+				output = HttpResponse(
+					json.dumps({ 'success' : { 
+						'modal_content' : yes_or_no(
+							'?action=supprimer-marche-etape-2',
+							'suppr_marche',
+							[[
+								'Projet(s)', projets.count()
+							], [
+								'Animation(s)', anims.count()
+							], [
+								'Demi-journée(s) de préparation et de réalisation', tdjs.count()
+							]]
+						)
+					}}),
+					content_type = 'application/json'
+				)
+
+			# Suppression du marché
+			if _req.GET['action'] == 'supprimer-marche-etape-2' :
+
+				# Suppression de l'instance TMarche
+				obj_marche.delete()
+
+				# Affichage du message de succès
+				output = HttpResponse(
+					json.dumps({ 'success' : {
+						'message' : 'Le marché a été supprimé avec succès.',
+						'redirect' : reverse('chois_marche')
+					}}),
+					content_type = 'application/json'
+				)
 				
 		else :
 
@@ -276,11 +322,12 @@ def consult_marche(_req, _m) :
 					'value' : [[
 						str(pm.get_prest()),
 						pm.get_nbre_dj_ap_pm__str(),
-						'',
-						'',
+						pm.get_nbre_dj_progr_pm('AP'),
+						pm.get_nbre_dj_prep_real_pm(),
+						pm.get_nbre_dj_ap_rest_pm(),
 						pm.get_nbre_dj_pp_pm__str(),
-						'',
-						'',
+						pm.get_nbre_dj_progr_pm('PP'),
+						pm.get_nbre_dj_pp_rest_pm(),
 						'''
 						<span action="?action=initialiser-formset-transactions-demi-journees&id={}"
 						class="half-icon icon-without-text" modal-suffix="ger_tdj" onclick="ajax(event);"
@@ -301,20 +348,21 @@ def consult_marche(_req, _m) :
 					'table_header' : [
 						[
 							['Nom', 'rowspan:3'],
-							['Nombre de demi-journées', 'colspan:6'],
+							['Nombre de demi-journées', 'colspan:7'],
 							['', 'rowspan:3'],
 							['', 'rowspan:3'],
 							['', 'rowspan:3']
 						],
 						[
-							['Animations ponctuelles', 'colspan:3'],
+							['Animations ponctuelles', 'colspan:4'],
 							['Programmes pédagogiques', 'colspan:3']
 						],
 						[
-							['Prévues au marché', None],
+							['Prévues', None],
 							['Programmées', None],
+							['De prép. et de réal.', None],
 							['Restantes', None],
-							['Prévues au marché', None],
+							['Prévues', None],
 							['Programmées', None],
 							['Restantes', None]
 						]
@@ -352,6 +400,7 @@ def consult_marche(_req, _m) :
 					)
 				),
 				modal_init('modif_pm', 'Modifier un prestataire'),
+				modal_init('suppr_marche', 'Êtes-vous sûr de vouloir supprimer définitivement le marché ?'),
 				modal_init('suppr_pm', 'Êtes-vous sûr de vouloir retirer définitivement le prestataire de ce marché ?')
 			]
 
@@ -440,6 +489,7 @@ def consult_marche(_req, _m) :
 							content_type = 'application/json'
 						)
 
+			# Gestion des demi-journées de préparation et de réalisation
 			if _req.GET['action'] == 'gerer-transactions-demi-journees' :
 
 				# Obtention d'une instance TPrestatairesMarche

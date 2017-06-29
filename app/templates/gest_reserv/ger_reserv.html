@@ -40,26 +40,18 @@
 			</div>
 			<div class="panel-fieldset row">Aides proposées par le SMMAR</div>
 			<span class="important">{{ aides_smmar }}</span>
-			<div class="row">
-				<div class="col-sm-4">{{ form_ger_reserv.doit_livrer }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.quand_livrer }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.ou_livrer }}</div>
-			</div>
-			<div class="row">
-				<div class="col-sm-4">{{ form_ger_reserv.doit_monter }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.quand_monter }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.ou_monter }}</div>
-			</div>
-			<div class="row">
-				<div class="col-sm-4">{{ form_ger_reserv.doit_chercher }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.quand_chercher }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.ou_chercher }}</div>
-			</div>
-			<div class="row">
-				<div class="col-sm-4">{{ form_ger_reserv.doit_demonter }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.quand_demonter }}</div>
-				<div class="col-sm-4">{{ form_ger_reserv.ou_demonter }}</div>
-			</div>
+			{{ form_ger_reserv.doit_livrer }}
+			{{ form_ger_reserv.quand_livrer }}
+			{{ form_ger_reserv.ou_livrer }}
+			{{ form_ger_reserv.doit_monter }}
+			{{ form_ger_reserv.quand_monter }}
+			{{ form_ger_reserv.ou_monter }}
+			{{ form_ger_reserv.doit_chercher }}
+			{{ form_ger_reserv.quand_chercher }}
+			{{ form_ger_reserv.ou_chercher }}
+			{{ form_ger_reserv.doit_demonter }}
+			{{ form_ger_reserv.quand_demonter }}
+			{{ form_ger_reserv.ou_demonter }}
 			<div class="panel-fieldset row">Données complémentaires de la réservation</div>
 			{{ form_ger_reserv.comm_reserv }}
 			<button class="center-block custom-button main-button" type="submit">Valider</button>

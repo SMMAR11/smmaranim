@@ -22,7 +22,15 @@ class GererProjet(forms.ModelForm) :
 		# Import
 		from app.models import TProjet
 
-		fields = ['comm_projet', 'id_type_public', 'int_projet']
+		fields = [
+			'comm_projet',
+			'courr_refer_projet',
+			'id_type_public',
+			'int_projet',
+			'nom_refer_projet',
+			'prenom_refer_projet',
+			'tel_refer_projet'
+		]
 		model = TProjet
 
 	def __init__(self, *args, **kwargs) :
@@ -70,8 +78,8 @@ class GererProjet(forms.ModelForm) :
 		if val_sti : obj.id_sti = TSousTypeIntervention.objects.get(pk = val_sti)
 		obj.save()
 
-		# Suppression des instances TClassesEcoleProjet si le type de public visé n'est pas un public jeune
-		if 'id_type_public' in self.changed_data : obj.get_cep().all().delete()
+		# Suppression d'instances si le type de public visé n'est pas un public jeune
+		if 'id_type_public' in self.changed_data : obj.get_cep().all().delete(); obj.get_ta().all().delete()
 
 		return obj
 
@@ -86,6 +94,15 @@ class FiltrerProjet(forms.Form) :
 	zl_type_interv = forms.ModelChoiceField(
 		label = 'Type d\'intervention', queryset = TTypeIntervention.objects.all(), required = False
 	)
+
+	def __init__(self, *args, **kwargs) :
+
+		# Initialisation des arguments
+		kw_org = kwargs.pop('kw_org', None)
+
+		super(FiltrerProjet, self).__init__(*args, **kwargs)
+
+		if kw_org : self.fields['zl_org'].initial = kw_org
 
 	def get_datatable(self, _req, *args, **kwargs) :
 
@@ -117,6 +134,7 @@ class FiltrerProjet(forms.Form) :
 			p.get_org(),
 			p.get_type_interv(),
 			p.get_sti() or '-',
+			p.get_type_public(),
 			'''
 			<a href="{}" class="inform-icon pull-right" title="Consulter le projet"></a>
 			'''.format(reverse('consult_projet', args = [p.get_pk()]))
@@ -131,6 +149,7 @@ class FiltrerProjet(forms.Form) :
 						<th>Organisme</th>
 						<th>Type d'intervention</th>
 						<th>Événement</th>
+						<th>Type de public visé</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -146,7 +165,7 @@ class GererClassesEcoleProjet(forms.ModelForm) :
 		# Import
 		from app.models import TClassesEcoleProjet
 
-		fields = ['courr_refer_cep', 'id_classe', 'id_ecole', 'nom_refer_cep', 'prenom_refer_cep', 'tel_refer_cep']
+		fields = ['id_classe', 'id_ecole']
 		model = TClassesEcoleProjet
 
 	def __init__(self, *args, **kwargs) :
@@ -155,19 +174,7 @@ class GererClassesEcoleProjet(forms.ModelForm) :
 		self.kw_projet = kwargs.pop('kw_projet', None)
 
 		super(GererClassesEcoleProjet, self).__init__(*args, **kwargs)
-
-	def clean(self) :
-
-		# Stockage des données du formulaire
-		cleaned_data = super(GererClassesEcoleProjet, self).clean()
-		val_classe = cleaned_data.get('id_classe')
-		val_ecole = cleaned_data.get('id_ecole')
-
-		# Renvoi d'une erreur en cas de redondance d'une classe pour une école donnée
-		ceps = self.kw_projet.get_cep().filter(id_classe = val_classe, id_ecole = val_ecole)
-		if self.instance.get_pk() : ceps = ceps.exclude(pk = self.instance.get_pk())
-		if ceps.count() > 0 :
-			self.add_error('__all__', 'La classe a déjà été ajoutée pour cet établissement scolaire.')
+		self.empty_permitted = False
 
 	def save(self, commit = True) :
 
@@ -177,3 +184,69 @@ class GererClassesEcoleProjet(forms.ModelForm) :
 		obj.save()
 
 		return obj
+
+	def get_datatable(self, _req, *args, **kwargs) :
+
+		# Imports
+		from app.forms.gest_projets import GererClassesEcoleProjet
+		from app.functions.formset_init import sub as formset_init
+
+		# Définition des valeurs initiales de chaque formulaire du formset si besoin
+		initial = [{
+			'id_classe' : cep.get_classe(),
+			'id_ecole' : cep.get_ecole()
+		} for cep in self.kw_projet.get_cep().all()]
+
+		# Initialisation du formset
+		formset = formset_init(
+			'ger_cep', GererClassesEcoleProjet, ['', False], 'id_classe|id_ecole', { 'initial' : initial }
+		)
+
+		return formset
+
+class GererTrancheAge(forms.ModelForm) :
+	
+	class Meta :
+
+		# Import
+		from app.models import TTrancheAge
+
+		fields = ['int_struct_ta', 'min_ta', 'max_ta']
+		model = TTrancheAge
+
+	def __init__(self, *args, **kwargs) :
+
+		# Initialisation des arguments
+		self.kw_projet = kwargs.pop('kw_projet', None)
+
+		super(GererTrancheAge, self).__init__(*args, **kwargs)
+		self.empty_permitted = False
+
+	def save(self, commit = True) :
+
+		# Création/modification d'une instance TTrancheAge
+		obj = super(GererTrancheAge, self).save(commit = False)
+		obj.id_projet = self.kw_projet
+		obj.save()
+
+		return obj
+
+	def get_datatable(self, _req, *args, **kwargs) :
+
+		# Imports
+		from app.forms.gest_projets import GererTrancheAge
+		from app.functions.formset_init import sub as formset_init
+
+		# Définition des valeurs initiales de chaque formulaire du formset si besoin
+		initial = [{
+			'int_struct_ta' : ta.get_int_struct_ta(),
+			'min_ta' : ta.get_min_ta(),
+			'max_ta' : ta.get_max_ta()
+		} for ta in self.kw_projet.get_ta().all()]
+
+		# Initialisation du formset
+		formset = formset_init(
+			'ger_ta', GererTrancheAge, ['', False], 'min_ta|max_ta|int_struct_ta', { 'initial' : initial }
+		)
+		
+		return formset

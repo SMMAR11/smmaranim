@@ -2,6 +2,7 @@
 {% block content %}
 <div class="pdf-attributes-wrapper">
 	<div class="pdf-title-1">{{ title }}</div>
+	<div class="pdf-title-2">Caractéristiques</div>
 	<div class="pdf-row">
 		<div class="pdf-col-6">{{ attrs_projet.org }}</div>
 		<div class="pdf-col-6">{{ attrs_projet.marche }}</div>
@@ -12,6 +13,73 @@
 		<div class="pdf-col-6">{{ attrs_projet.sti }}</div>
 	</div>
 	{{ attrs_projet.type_public }}
+	{{ attrs_projet.refer_projet }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ attrs_projet.courr_refer_projet }}</div>
+		<div class="pdf-col-6">{{ attrs_projet.tel_refer_projet }}</div>
+	</div>
 	{{ attrs_projet.comm_projet }}
+	<div class="pdf-title-2">Animations</div>
+	{% for a in anims %}
+	<div class="pdf-title-3">{{ a.a__object.get_dt_anim__str }} {{ a.a__object }}</div>
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.a__attrs.prest }}</div>
+		<div class="pdf-col-6">{{ a.a__attrs.projet }}</div>
+	</div>
+	{{ a.a__attrs.dt_heure_anim }}
+	{{ a.a__attrs.nat_anim }}
+	{{ a.a__attrs.nbre_dj_anim }}
+	{{ a.a__attrs.struct }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.a__attrs.lieu_anim }}</div>
+		<div class="pdf-col-6">{{ a.a__attrs.comm }}</div>
+	</div>
+	{% if a.b__object %}
+	<div class="pdf-title-4">Bilan</div>
+	{% if a.b__object.get_ba %}
+	<div class="pdf-title-5">Données générales de l'animation</div>
+	{{ a.b__attrs.util }}
+	{{ a.b__attrs.org }}
+	{{ a.b__attrs.titre_ba }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.b__attrs.nbre_pers_pres_ba }}</div>
+		<div class="pdf-col-6">{{ a.b__attrs.nbre_pers_prev_ba }}</div>
+	</div>
+	{{ a.b__attrs.theme_ba }}
+	{{ a.b__attrs.themat_abord_ba }}
+	{{ a.b__attrs.deroul_ba }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.b__attrs.en_inter }}</div>
+		<div class="pdf-col-6">{{ a.b__attrs.en_exter }}</div>
+	</div>
+	<div class="pdf-title-5">Contact référent de l'animation</div>
+	{{ a.b__attrs.refer_bilan }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.b__attrs.fonct_refer_bilan }}</div>
+		<div class="pdf-col-6">{{ a.b__attrs.struct_refer_bilan }}</div>
+	</div>
+	<div class="pdf-title-5">Ressenti de l'animation</div>
+	{{ a.b__attrs.eval_ba }}
+	{{ a.b__attrs.point }}
+	<div class="pdf-title-5">Données complémentaires de l'animation</div>
+	{{ a.b__attrs.plaq }}
+	{{ a.b__attrs.photo_ba }}
+	{{ a.b__attrs.rdp_1_ba }}
+	{{ a.b__attrs.rdp_2_ba }}
+	{{ a.b__attrs.rdp_3_ba }}
+	{{ a.b__attrs.outil_ba }}
+	{{ a.b__attrs.comm_bilan }}
+	{% else %}
+	{{ a.b__attrs.util }}
+	{{ a.b__attrs.org }}
+	{{ a.b__attrs.refer_bilan }}
+	<div class="pdf-row">
+		<div class="pdf-col-6">{{ a.b__attrs.fonct_refer_bilan }}</div>
+		<div class="pdf-col-6">{{ a.b__attrs.struct_refer_bilan }}</div>
+	</div>
+	{{ a.b__attrs.comm_bilan }}
+	{% endif %}
+	{% endif %}
+	{% endfor %}
 </div>
 {% endblock content %}

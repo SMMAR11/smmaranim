@@ -73,11 +73,24 @@ def ger_projet(_req, _inst) :
 		# Définition du contenu de la balise <title/> (également utile à d'autres endroits)
 		title = 'Modifier un projet' if obj_projet else 'Ajouter un projet'
 
+		# Définition du message d'avertissement
+		f = None
+		if obj_projet :
+			if obj_projet.get_type_public().get_pk() == PKS['id_type_public__jps'] :
+				f = 'classes'
+			elif obj_projet.get_type_public().get_pk() == PKS['id_type_public__jpes'] :
+				f = 'tranches d\'âge'
+		if f :
+			message = '''
+			Attention, si vous changez le type de public visé, alors les {} précédemment ajoutées seront supprimées.
+			'''.format(f)
+		else :
+			message = ''
+
 		# Affichage du template
 		output = render(_req, './gest_projets/ger_projet.html', {
 			'form_ger_projet' : form_init(form_ger_projet),
-			'message__show' : True if obj_projet and \
-			obj_projet.get_type_public().get_pk() == PKS['id_type_public__jp'] else False,
+			'message' : message,
 			'modals' : [modal_init('ger_projet', title)],
 			'p' : obj_projet,
 			'title' : title
@@ -120,6 +133,7 @@ def chois_projet(_req) :
 	from app.forms.gest_projets import FiltrerProjet
 	from app.functions.datatable_reset import sub as datatable_reset
 	from app.functions.form_init import sub as form_init
+	from app.models import TUtilisateur
 	from django.http import HttpResponse
 	from django.shortcuts import render
 	import json
@@ -129,7 +143,7 @@ def chois_projet(_req) :
 	if _req.method == 'GET' :
 
 		# Initialisation du formulaire
-		form_filtr_projet = FiltrerProjet()
+		form_filtr_projet = FiltrerProjet(kw_org = TUtilisateur.get_util_connect(_req).get_org())
 
 		# Affichage du template
 		output = render(_req, './gest_projets/chois_projet.html', {
@@ -161,15 +175,19 @@ def consult_projet(_req, _p) :
 
 	# Imports
 	from app.forms.gest_projets import GererClassesEcoleProjet
-	from app.form_templates.gest_projets import ger_cep
+	from app.forms.gest_projets import GererTrancheAge
 	from app.functions.modal_init import sub as modal_init
 	from app.functions.yes_or_no import sub as yes_or_no
 	from app.models import TProjet
-	from app.models import TClassesEcoleProjet
 	from app.models import TUtilisateur
+	from django.core.urlresolvers import reverse
+	from django.forms import formset_factory
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
 	from django.shortcuts import render
+	from django.template.context_processors import csrf
+	from functools import partial
+	from functools import wraps
 	from smmaranim.custom_settings import PKS
 	import json
 
@@ -188,117 +206,119 @@ def consult_projet(_req, _p) :
 	if _req.method == 'GET' :
 		if 'action' in _req.GET :
 
-			# Impression du projet
-			if _req.GET['action'] == 'imprimer-projet' :
-				output = render(_req, './gest_projets/imprim_projet.html', {
-					'attrs_projet' : obj_projet.get_attrs_projet(True), 'title' : 'Imprimer un projet'
-				})
+			# Affichage d'une demande de suppression d'un projet
+			if _req.GET['action'] == 'supprimer-projet-etape-1' :
 
-			# Initialisation du formulaire de modification d'un couple classe/école/projet
-			if _req.GET['action'] == 'initialiser-formulaire-modification-classe-ecole-projet' and 'id' in _req.GET :
+				# Ajout d'une protection
+				if obj_projet.get_anim().count() == 0 :
+					modal_content = yes_or_no('?action=supprimer-projet-etape-2', 'suppr_projet')
+				else :
+					modal_content = '''
+					<span class="very-important">Attention, avant de pouvoir supprimer le projet, veuillez d'abord 
+					supprimer toutes les animations liées à celui-ci.</span>
+					'''
 
-				# Obtention d'une instance TClassesEcoleProjet
-				obj_cep = TClassesEcoleProjet.objects.get(pk = _req.GET['id'], id_projet = obj_projet)
-
-				# Mise en session de l'identifiant du couple réservation/contact référent
-				_req.session['tclassesecoleprojet__pk__update'] = obj_cep.get_pk()
-
-				# Affichage du formulaire
 				output = HttpResponse(
-					json.dumps({ 'success' : { 
-						'modal_content' : ger_cep(_req, { 'instance' : obj_cep, 'prefix' : prefix_modif_cep })
-					}}),
-					content_type = 'application/json'
+					json.dumps({ 'success' : { 'modal_content' : modal_content }}), content_type = 'application/json'
 				)
 
-			# Consultation d'une classe
-			if _req.GET['action'] == 'consulter-classe-ecole-projet' and 'id' in _req.GET :
-
-				# Obtention d'une instance TClassesEcoleProjet
-				obj_cep = TClassesEcoleProjet.objects.get(pk = _req.GET['id'], id_projet = obj_projet)
-
-				# Initialisation des attributs de la classe
-				attrs_cep = obj_cep.get_attrs_cep()
-
-				# Affichage des attributs
-				output = HttpResponse(
-					json.dumps({ 'success' : { 
-						'modal_content' : '''
-						<div class="attributes-wrapper">
-							<div class="row">
-								<div class="col-sm-6">{}</div>
-								<div class="col-sm-6">{}</div>
-							</div>
-							{}
-							{}
-							{}
-						</div>
-						'''.format(
-							attrs_cep['id_classe'],
-							attrs_cep['id_ecole'],
-							attrs_cep['refer_cep'],
-							attrs_cep['courr_refer_cep'],
-							attrs_cep['tel_refer_cep']
-						)
-					}}),
-					content_type = 'application/json'
-				)
-
-			# Affichage d'une demande de suppression d'un couple classe/école/projet
-			if _req.GET['action'] == 'supprimer-classe-ecole-projet-etape-1' and 'id' in _req.GET :
-
-				# Obtention d'une instance TClassesEcoleProjet
-				obj_cep = TClassesEcoleProjet.objects.get(pk = _req.GET['id'], id_projet = obj_projet)
-
-				# Mise en session de l'identifiant du couple classe/école/projet
-				_req.session['tclassesecoleprojet__pk__delete'] = obj_cep.get_pk()
-
-				# Affichage de la demande de suppression
-				output = HttpResponse(
-					json.dumps({ 'success' : { 
-						'modal_content' : yes_or_no('?action=supprimer-classe-ecole-projet-etape-2', 'suppr_cep')
-					}}),
-					content_type = 'application/json'
-				)
-
-			# Suppression d'un couple classe/école/projet
-			if _req.GET['action'] == 'supprimer-classe-ecole-projet-etape-2' \
-			and 'tclassesecoleprojet__pk__delete' in _req.session :
+			# Suppression d'un projet
+			if _req.GET['action'] == 'supprimer-projet-etape-2' :
 
 				# Vérification du droit d'accès
 				obj_util_connect.can_access(obj_projet.get_org(), False)
 
-				# Suppression d'une instance TClassesEcoleProjet
-				TClassesEcoleProjet.objects.get(pk = _req.session.get('tclassesecoleprojet__pk__delete')).delete()
-
-				# Suppression de la variable de session si définie
-				if 'tclassesecoleprojet__pk__delete' in _req.session :
-					del _req.session['tclassesecoleprojet__pk__delete']
+				# Suppression d'une instance TProjet
+				obj_projet.delete()
 
 				# Affichage du message de succès
 				output = HttpResponse(
 					json.dumps({ 'success' : {
-						'message' : 'La classe a été supprimée avec succès.', 'redirect' : '__RELOAD__'
+						'message' : 'Le projet a été supprimé avec succès.',
+						'redirect' : reverse('chois_projet')
 					}}),
 					content_type = 'application/json'
 				)
+ 
+			# Impression du projet
+			if _req.GET['action'] == 'imprimer-projet' :
+
+				# Initialisation des animations du projet
+				anims = []
+				for a in obj_projet.get_anim().all() :
+
+					# Stockage des attributs du bilan
+					attrs_bilan = None
+					if a.get_bilan__object() :
+						if a.get_bilan__object().get_ba() :
+							attrs_bilan = a.get_bilan__object().get_ba().get_attrs_ba(True)
+						else :
+							attrs_bilan = a.get_bilan__object().get_attrs_bilan(True)
+
+					anims.append({
+						'a__object' : a,
+						'a__attrs' : a.get_attrs_anim(True),
+						'b__object' : a.get_bilan__object(),
+						'b__attrs' : attrs_bilan
+					})
+
+				output = render(_req, './gest_projets/imprim_projet.html', {
+					'anims' : anims,
+					'attrs_projet' : obj_projet.get_attrs_projet(True),
+					'title' : 'Imprimer un projet'
+				})
 
 		else :
 
+			# Stockage des indicateurs d'affichage des onglets liés au jeune public
+			onglets = {
+				'ongl_cep' : True if obj_projet.get_type_public().get_pk() == PKS['id_type_public__jps'] else False,
+				'ongl_ta' : True if obj_projet.get_type_public().get_pk() == PKS['id_type_public__jpes'] else False,
+			}
+
 			# Déclaration des fenêtres modales
-			modals = [
-				modal_init('ajout_cep', 'Ajouter une classe', ger_cep(_req, { 'prefix' : prefix_ajout_cep })),
-				modal_init('consult_cep', 'Consulter une classe'),
-				modal_init('modif_cep', 'Modifier une classe'),
-				modal_init('suppr_cep', 'Êtes-vous sûr de vouloir supprimer définitivement la classe ?')
-			]
+			modals = [modal_init('suppr_projet', 'Êtes-vous sûr de vouloir supprimer définitivement le projet ?')]
+			if onglets['ongl_cep'] == True :
+				modals.append(modal_init(
+					'ger_cep',
+					'Gérer les classes',
+					'''
+					<form action="?action=gerer-classes-ecole-projet" method="post" name="form_ger_cep"
+					onsubmit="ajax(event);">
+						<input name="csrfmiddlewaretoken" type="hidden" value="{}">
+						{}
+						<button class="center-block custom-button main-button" type="submit">Valider</button>
+					</form>
+					{}
+					'''.format(
+						csrf(_req)['csrf_token'],
+						*GererClassesEcoleProjet(kw_projet = obj_projet).get_datatable(_req)
+					)
+				))
+			if onglets['ongl_ta'] == True :
+				modals.append(modal_init(
+					'ger_ta',
+					'Gérer les tranches d\'âge',
+					'''
+					<form action="?action=gerer-tranche-age" method="post" name="form_ger_ta"
+					onsubmit="ajax(event);">
+						<input name="csrfmiddlewaretoken" type="hidden" value="{}">
+						{}
+						<button class="center-block custom-button main-button" type="submit">Valider</button>
+					</form>
+					{}
+					'''.format(
+						csrf(_req)['csrf_token'],
+						*GererTrancheAge(kw_projet = obj_projet).get_datatable(_req)
+					)
+				))
 
 			# Affichage du template
 			output = render(_req, './gest_projets/consult_projet.html', {
 				'attrs_projet' : obj_projet.get_attrs_projet(),
 				'can_access' : obj_util_connect.can_access(obj_projet.get_org()),
-				'ongl_cep__show' : True if obj_projet.get_type_public().get_pk() == PKS['id_type_public__jp'] else False,
 				'modals' : modals,
+				'onglets' : onglets,
 				'p' : obj_projet,
 				'title' : 'Consulter un projet'
 			})
@@ -306,15 +326,11 @@ def consult_projet(_req, _p) :
 	else :
 		if 'action' in _req.GET :
 
-			# Initialisation des paramètres du formulaire de gestion d'un couple classe/école/projet
-			if _req.GET['action'] == 'ajouter-classe-ecole-projet' :
-				params = { 'instance' : None, 'prefix' : prefix_ajout_cep }
-			elif _req.GET['action'] == 'modifier-classe-ecole-projet' :
-				params = {
-					'instance' : TClassesEcoleProjet.objects \
-					.get(pk = _req.session.get('tclassesecoleprojet__pk__update')),
-					'prefix' : prefix_modif_cep
-				}
+			# Définition des paramètres
+			if _req.GET['action'] == 'gerer-classes-ecole-projet' :
+				params = [GererClassesEcoleProjet, obj_projet.get_cep().all()]
+			elif _req.GET['action'] == 'gerer-tranche-age' :
+				params = [GererTrancheAge, obj_projet.get_ta().all()]
 			else :
 				params = None
 
@@ -323,27 +339,29 @@ def consult_projet(_req, _p) :
 				# Vérification du droit d'accès
 				obj_util_connect.can_access(obj_projet.get_org(), False)
 
-				# Soumission du formulaire
-				form_ger_cep = GererClassesEcoleProjet(
-					_req.POST, instance = params['instance'], prefix = params['prefix'], kw_projet = obj_projet
-				)
+				# Soumission du formset
+				formset = formset_factory(
+					wraps(params[0])(partial(params[0], kw_projet = obj_projet))
+				)(_req.POST)
 
-				if form_ger_cep.is_valid() :
+				# Initialisation des erreurs
+				erreurs = {}
+				if not formset.is_valid() :
+					for form in formset :
+						for cle, val in form.errors.items() : erreurs['{}-{}'.format(form.prefix, cle)] = val
 
-					# Suppression de la variable de session si définie
-					if 'tclassesecoleprojet__pk__update' in _req.session :
-						del _req.session['tclassesecoleprojet__pk__update']
+				if len(erreurs) == 0 :
 
-					# Création/modification d'une instance TClassesEcoleProjet
-					obj_cep_valid = form_ger_cep.save()
+					# Suppression de toutes les instances liées à une instance TProjet
+					params[1].delete()
+
+					# Création d'une instance
+					for form in formset : form.save()
 
 					# Affichage du message de succès
 					output = HttpResponse(
 						json.dumps({ 'success' : {
-							'message' : '''
-							La classe a été {} avec succès.
-							'''.format('modifiée' if params['instance'] else 'ajoutée'),
-							'redirect' : '__RELOAD__'
+							'message' : 'Le projet a été modifié avec succès.', 'redirect' : '__RELOAD__'
 						}}),
 						content_type = 'application/json'
 					)
@@ -351,11 +369,6 @@ def consult_projet(_req, _p) :
 				else :
 
 					# Affichage des erreurs
-					output = HttpResponse(
-						json.dumps({
-							'{}-{}'.format(form_ger_cep.prefix, cle) : val for cle, val in form_ger_cep.errors.items()
-						}),
-						content_type = 'application/json'
-					)
+					output = HttpResponse(json.dumps(erreurs), content_type = 'application/json')
 
 	return output

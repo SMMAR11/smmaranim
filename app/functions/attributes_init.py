@@ -21,7 +21,33 @@ def sub(_attrs, _pdf = False) :
 
 			# Définition du contenu de l'attribut
 			attr_content = None
-			if 'table' in val :
+			if 'download' in val :
+				if val['download'] == True :
+					if _pdf == False :
+						if len(value) > 0 :
+							attr_content = '''
+							<a href="{}" class="download-icon icon-with-text" download="">{}</a>
+							'''.format(value, label)
+					else :
+						if value != '-' :
+							attr_content = '''
+							<span class="pdf-attribute-label">{}</span>
+							<div class="pdf-attribute">{}</div>
+							'''.format(label, value)
+			elif 'pdf' in val :
+				if val['pdf'] == True :
+					if _pdf == False :
+						if len(value) > 0 :
+							attr_content = '''
+							<a href="{}" target="blank" class="icon-with-text pdf-icon">{}</a>
+							'''.format(value, label)
+					else :
+						if value != '-' :
+							attr_content = '''
+							<span class="pdf-attribute-label">{}</span>
+							<div class="pdf-attribute">{}</div>
+							'''.format(label, value)
+			elif 'table' in val :
 				if val['table'] == True and 'table_header' in val :
 
 					# Initialisation des lignes de la balise <thead/>
@@ -67,6 +93,45 @@ def sub(_attrs, _pdf = False) :
 							<tbody>{}</tbody>
 						</table>
 						'''.format(label, thead, tbody if not tbody == '<tr><td>-</td></tr>' else '')
+			elif 'row' in val :
+				if val['row'] == True :
+
+					# Attribut PDF ou non ?
+					key = 1 if _pdf == True else 0
+
+					# Stockage des classes pour chaque cas
+					classes = {
+						'cols' : [
+							None,
+							['col-xs-12', 'pdf-col-12'],
+							['col-xs-6', 'pdf-col-6'],
+							['col-xs-4', 'pdf-col-4']
+						],
+						'label' : ['attribute-label', 'pdf-attribute-label'],
+						'value' : ['attribute', 'pdf-attribute']
+					}	
+
+					# Initialisation des contenus (limité à 3) 
+					contents = []
+					cpt = 0
+					for elem in val['value'] :
+						if elem and cpt < 3 :
+							contents.append(elem); cpt += 1
+
+					# Mise en forme de la ligne
+					if classes['cols'][cpt] :
+						attr_content = '''
+						<span class="{}">{}</span>
+						<div class="{}">{}</div>
+						'''.format(
+							classes['label'][key],
+							label,
+							'pdf-row' if key == 1 else 'row',
+							''.join([
+								'<div class="{}">{}</div>'.format(classes['cols'][cpt][key], elem) for elem in contents
+							])
+						)
+
 			else :
 				attr_content = '''
 				<span class="{pdf}attribute-label">{label}</span>

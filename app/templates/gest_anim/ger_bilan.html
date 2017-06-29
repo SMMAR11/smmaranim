@@ -1,0 +1,17 @@
+{% extends 'template.html' %}
+{% block content %}
+{% if a %}
+<div style="text-align: right;">
+	<a href="{% url 'consult_anim' a.get_pk %}" class="icon-with-text previous-icon">Revenir à l'animation</a>
+</div>
+{% endif %}
+<div class="custom-form panel">
+	<div class="panel-heading">{{ title }}</div>
+	<div class="panel-body">
+		<form action="" method="post" name="form_ger_ba" onsubmit="ajax(event);">
+			{% csrf_token %}
+			<button class="center-block custom-button main-button" type="submit">Valider</button>
+		</form>
+	</div>
+</div>
+{% endblock content %}

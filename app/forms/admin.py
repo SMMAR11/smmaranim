@@ -16,14 +16,9 @@ class FUtilisateurCreate(forms.ModelForm) :
         required = False,
         widget = FilteredSelectMultiple('T_TYPE_UTILISATEUR', is_stacked = False)
     )
-    zcc_est_superutilisateur = forms.BooleanField(
-        help_text = 'Précise si l\'utilisateur peut se connecter au site d\'administration.',
-        label = 'Super-utilisateur',
-        required = False
-    )
 
     class Meta :
-        fields = ['email', 'first_name', 'id_org', 'is_active', 'last_name', 'username']
+        fields = ['email', 'first_name', 'id_org', 'is_active', 'is_staff', 'is_superuser', 'last_name', 'username']
         labels = { 'email' : 'Courriel', 'last_name' : 'Nom de famille' }
         model = TUtilisateur
 
@@ -52,12 +47,9 @@ class FUtilisateurCreate(forms.ModelForm) :
         cleaned_data = self.cleaned_data
         val_password = cleaned_data.get('zs_password')
         val_type_util = cleaned_data.get('zl_type_util')
-        val_est_superutilisateur = cleaned_data.get('zcc_est_superutilisateur')
 
         # Création d'une instance TUtilisateur
         obj = super(FUtilisateurCreate, self).save(*args, **kwargs)
-        obj.is_staff = val_est_superutilisateur
-        obj.is_superuser = val_est_superutilisateur
         obj.set_password(self.cleaned_data.get('zs_password'))
         obj.save()
 
@@ -86,14 +78,9 @@ class FUtilisateurUpdate(forms.ModelForm) :
         required = False,
         widget = FilteredSelectMultiple('T_TYPE_UTILISATEUR', is_stacked = False)
     )
-    zcc_est_superutilisateur = forms.BooleanField(
-        help_text = 'Précise si l\'utilisateur peut se connecter au site d\'administration.',
-        label = 'Super-utilisateur',
-        required = False
-    )
 
     class Meta :
-        fields = ['email', 'first_name', 'id_org', 'is_active', 'last_name', 'username']
+        fields = ['email', 'first_name', 'id_org', 'is_active', 'is_staff', 'is_superuser', 'last_name', 'username']
         labels = { 'email' : 'Courriel principal', 'last_name' : 'Nom de famille' }
         model = TUtilisateur
 
@@ -107,7 +94,6 @@ class FUtilisateurUpdate(forms.ModelForm) :
 
         # Définition de la valeur initiale pour chaque champ
         self.fields['zl_type_util'].initial = [tu.get_pk() for tu in self.instance.get_type_util().all()]
-        self.fields['zcc_est_superutilisateur'].initial = self.instance.get_is_superadmin()
 
     def clean_password(self) : return self.initial['password']
 
@@ -116,12 +102,9 @@ class FUtilisateurUpdate(forms.ModelForm) :
         # Stockage des données du formulaire
         cleaned_data = self.cleaned_data
         val_type_util = cleaned_data.get('zl_type_util')
-        val_est_superutilisateur = cleaned_data.get('zcc_est_superutilisateur')
 
         # Modification d'une instance TUtilisateur
         obj = super(FUtilisateurUpdate, self).save(*args, **kwargs)
-        obj.is_staff = val_est_superutilisateur
-        obj.is_superuser = val_est_superutilisateur
         obj.save()
 
         # Liaison avec la table t_droits_utilisateur

@@ -19,7 +19,8 @@ from django.contrib import admin
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
     url(r'^index.html$', index.index, name = 'index'),
-    url(r'^$', index.index, name = 'index')
+    url(r'^$', index.index, name = 'index'),
+    url(r'^consulter-compte.html$', index.consult_compte, name = 'consult_compte')
 ]
 
 # Détermination de l'URL pour chacun des modules
@@ -74,7 +75,25 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^{}$'.format(gest_anim__url), gest_anim.ger_anim, name = 'gest_anim')
+	url(r'^{}$'.format(gest_anim__url), gest_anim.get_menu, name = 'gest_anim'),
+	url(
+		r'^{}ajouter-animation/$'.format(gest_anim__url),
+		gest_anim.ger_anim,
+		{ '_inst' : False },
+		name = 'ajout_anim'
+	),
+	url(
+		r'^{}modifier-animation/$'.format(gest_anim__url),
+		gest_anim.ger_anim,
+		{ '_inst' : True },
+		name = 'modif_anim'
+	),
+	url(r'^{}choisir-animation/$'.format(gest_anim__url), gest_anim.chois_anim, name = 'chois_anim'),
+	url(
+		r'^{}consulter-animation/([0-9]+)/$'.format(gest_anim__url),
+		gest_anim.consult_anim,
+		name = 'consult_anim'
+	)
 ]
 
 urlpatterns += [

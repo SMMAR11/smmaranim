@@ -29,6 +29,19 @@ class Outil(admin.ModelAdmin) :
 	fields = ['int_outil', 'descr_outil', 'photo_outil']
 	list_display = ['int_outil', 'descr_outil', 'get_photo_outil__img']
 
+	def save_model(self, _req, _obj, _form, _change) :
+
+		# Tentative d'obtention d'une instance TOutil
+		try :
+			obj = TOutil.objects.get(pk = _obj.get_pk())
+		except :
+			obj = None
+
+		# Suppression du fichier si modification
+		if obj and 'photo_outil' in _form.changed_data : obj.get_photo_outil().delete()
+
+		super(Outil, self).save_model(_req, _obj, _form, _change)
+
 admin.site.register(TOutil, Outil)
 
 class Utilisateur(UserAdmin) :
@@ -37,35 +50,33 @@ class Utilisateur(UserAdmin) :
 		if _obj : return self.readonly_fields + ('id_org',)
 		return self.readonly_fields
 
-	# Mise en forme de la dernière colonne
-	def get_is_superadmin(self, _obj) : return _obj.get_is_superadmin()
-	get_is_superadmin.allow_tags = True
-	get_is_superadmin.boolean = True
-	get_is_superadmin.short_description = 'Super-utilisateur'
-
 	actions = [admin.actions.delete_selected]
 	add_fieldsets = [
 		['Données personnelles', { 'fields' : [('last_name'), ('first_name'), ('email')] }],
 		['Données générales du compte', {
 			'fields' : [('username'), ('zs_password'), ('zs_password_bis'), ('id_org')]
 		}],
-		['Options du compte', { 'fields' : [('zl_type_util'), ('is_active'), ('zcc_est_superutilisateur')] }]
+		['Options du compte', {
+			'fields' : [('zl_type_util'), ('is_active'), ('is_staff'), ('is_superuser'), ('groups')]
+		}]
 	]
 	add_form = FUtilisateurCreate
 	fieldsets = [
 		['Données personnelles', { 'fields' : [('last_name'), ('first_name'), ('email')] }],
 		['Données générales du compte', { 'fields' : [('username'), ('password'), ('id_org')] }],
-		['Options du compte', { 'fields' : [('zl_type_util'), ('is_active'), ('zcc_est_superutilisateur')] }]
+		['Options du compte', {
+			'fields' : [('zl_type_util'), ('is_active'), ('is_staff'), ('is_superuser'), ('groups')]
+		}]
 	]
 	form = FUtilisateurUpdate
 	list_filter = []
-	list_display = ['username', 'last_name', 'first_name', 'email', 'id_org', 'is_active', 'get_is_superadmin']
+	list_display = ['username', 'last_name', 'first_name', 'email', 'id_org', 'is_active', 'is_staff', 'is_superuser']
 
 admin.site.register(TUtilisateur, Utilisateur)
 
 # Retrait des fonctionnalités d'origine
 admin.site.unregister(User)
-admin.site.unregister(Group)
+#admin.site.unregister(Group)
 
 class SousTypeIntervention(admin.ModelAdmin) :
 	actions = [admin.actions.delete_selected]

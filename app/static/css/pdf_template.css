@@ -11,10 +11,12 @@ body {
 /* Contrôles */
 .pdf-attribute-wrapper {
 	color: #555;
+	display: block;
 	margin-bottom: 20px;
 }
 
 .pdf-attribute-wrapper .pdf-attribute-label {
+	display: inline-block;
 	font-weight: bold;
 }
 
@@ -30,6 +32,10 @@ body {
 
 div[class^="pdf-col-"] {
 	float: left;
+}
+
+.pdf-col-4 {
+	width: calc(100% / 3);
 }
 
 .pdf-col-6 {
@@ -85,4 +91,19 @@ div[class^="pdf-title-"] {
 .pdf-title-2 {
 	background-color: #3770B1;
 	font-size: 16px;
+}
+
+.pdf-title-3 {
+	background-color: #94C054;
+	font-size: 14px;
+}
+
+.pdf-title-4 {
+	background-color: #555;
+	font-size: 12px;
+}
+
+.pdf-title-5 {
+	background-color: #DDD;
+	font-size: 12px;
 }

@@ -22,3 +22,25 @@ class Authentifier(forms.Form) :
 		# Vérification de l'état de l'identification
 		if val_username and val_password and not authenticate(username = val_username, password = val_password) :
 			self.add_error('__all__', 'Les identifiants rentrés sont incorrects.')
+
+class GererUtilisateur(forms.ModelForm) :
+
+	class Meta :
+
+		# Import
+		from app.models import TUtilisateur
+
+		fields = ['email', 'first_name', 'last_name']
+		model = TUtilisateur
+		labels = {
+			'email' : 'Courriel',
+			'last_name' : 'Nom de famille'
+		}
+
+	def __init__(self, *args, **kwargs) :
+		super(GererUtilisateur, self).__init__(*args, **kwargs)
+
+		# Passage des champs à l'état requis
+		self.fields['email'].required = True
+		self.fields['first_name'].required = True
+		self.fields['last_name'].required = True
