@@ -1,5 +1,128 @@
 # coding: utf-8
 
+def set_alerts(_req) :
+
+	# Import
+	from app.models import TReservation
+	from app.models import TUtilisateur
+	from datetime import date
+	from django.core.urlresolvers import reverse
+	from smmaranim.custom_settings import PKS
+
+	alertes = []
+
+	# Initialisation des niveaux d'alertes
+	niveaux = {
+		1 : 'background-color: #FDEE00;',
+		2 : 'background-color: #F8B862;',
+		3 : 'background-color: #FF0921;'
+	}
+
+	# Obtention d'une instance TUtilisateur
+	obj_util_connect = TUtilisateur.get_util_connect(_req)
+
+	if obj_util_connect :
+		for pm in obj_util_connect.get_org().get_pm().all() :
+
+			# Renvoi d'une alerte en cas de dépassement du marché en animations ponctuelles
+			if pm.get_nbre_dj_ap_rest_pm(False) < 0 :
+
+				# Calcul du taux de dépassement
+				taux = (abs(pm.get_nbre_dj_ap_rest_pm(False)) / pm.get_nbre_dj_ap_pm()) * 100
+
+				# Stockage du niveau d'alerte
+				if taux > 20 :
+					niveau = 3
+				elif taux > 10 :
+					niveau = 2
+				else :
+					niveau = 1
+
+				alertes.append({
+					'descr_alert' : '''
+					Le nombre de demi-journées prévues en animations ponctuelles a été dépassé de {} % pour le marché
+					suivant : {}.
+					'''.format('{0:g}'.format(taux), pm.get_marche()),
+					'lien_alert' : '#',
+					'nat_alert' : 'Dépassement du marché en animations ponctuelles',
+					'niveau_alert' : [niveau, niveaux[niveau]]
+				})
+
+			# Renvoi d'une alerte en cas de dépassement du marché en programmes pédagogiques
+			if pm.get_nbre_dj_pp_rest_pm(False) < 0 :
+
+				# Calcul du taux de dépassement
+				taux = (abs(pm.get_nbre_dj_pp_rest_pm(False)) / pm.get_nbre_dj_pp_pm()) * 100
+
+				# Stockage du niveau d'alerte
+				if taux > 20 :
+					niveau = 3
+				elif taux > 10 :
+					niveau = 2
+				else :
+					niveau = 1
+
+				alertes.append({
+					'descr_alert' : '''
+					Le nombre de demi-journées prévues en programmes pédagogiques a été dépassé de {} % pour le marché
+					suivant : {}.
+					'''.format('{0:g}'.format(taux), pm.get_marche()),
+					'lien_alert' : '#',
+					'nat_alert' : 'Dépassement du marché en programmes pédagogiques',
+					'niveau_alert' : [niveau, niveaux[niveau]]
+				})
+
+		if obj_util_connect.get_org().get_pk() == PKS['id_org__smmar'] :
+
+			# Stockage de la date du jour
+			today = date.today() 
+
+			for r in TReservation.objects.all() :
+
+				# Empilement des actions
+				actions = []
+				if r.get_doit_chercher() == True :
+					actions.append(['chercher', r.get_quand_chercher()])
+				if r.get_doit_demonter() == True :
+					actions.append(['démonter', r.get_quand_demonter()])
+				if r.get_doit_livrer() == True :
+					actions.append(['livrer', r.get_quand_livrer()])
+				if r.get_doit_monter() == True :
+					actions.append(['monter', r.get_quand_monter()])
+
+				# Renvoi d'une alerte en cas d'actions à venir
+				for elem in actions :
+					if elem[1].date() >= today :
+
+						# Stockage de la différence absolue entre la date du jour et la date de l'action
+						diff = abs((today - elem[1].date()).days)
+
+						# Stockage du niveau d'alerte
+						if diff < 8 :
+							niveau = 3
+						elif diff < 16 :
+							niveau = 2
+						elif diff < 32 :
+							niveau = 1
+						else :
+							niveau = None
+
+						if niveau :
+							alertes.append({
+								'descr_alert' : '''
+								Attention, le SMMAR doit {} l'outil suivant : {} (sauf si refus du SMMAR d'exécuter la
+								tâche souhaitée par le demandeur).
+								'''.format(elem[0], r.get_outil()),
+								'lien_alert' : reverse('consult_reserv', args = [r.get_pk()]),
+								'nat_alert' : 'Aides proposées par le SMMAR',
+								'niveau_alert' : [niveau, niveaux[niveau]]
+							})
+
+	return {
+		'alerts_list' : sorted(alertes, key = lambda l : (-l['niveau_alert'][0], l['nat_alert'])),
+		'badge_color' : '#FF0921' if len(alertes) > 0 else '#82C46C'
+	}
+
 '''
 Obtention des fichiers d'inclusion dans le template
 _req : Objet requête

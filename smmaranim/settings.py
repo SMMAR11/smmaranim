@@ -65,6 +65,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'app.context_processors.set_alerts',
                 'app.context_processors.set_consts',
                 'app.context_processors.set_incls',
                 'app.context_processors.set_menus',

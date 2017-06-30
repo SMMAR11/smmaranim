@@ -168,6 +168,7 @@ MONTHS = [
 PDF_INCLUDE_FILES = ['css/pdf_template.css']
 
 PKS = {
+	'id_org__smmar' : config('SMMAR__PK', cast = int),
 	'id_type_public__jps' : config('JEUNE_PUBLIC_SCOLAIRE__PK', cast = int),
 	'id_type_public__jpes' : config('JEUNE_PUBLIC_EXTRA_SCOLAIRE__PK', cast = int)
 }

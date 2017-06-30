@@ -51,6 +51,7 @@ $(window).on('load', function() {
 		// Initialisation des datatables
 		dtables = {
 			'aides' : init_datatable('#dtable_aides'),
+			'alert' : init_datatable('#dtable_alert', { 'autofit' : [0], 'unsorting' : '_all' }),
 			'anims' : init_datatable('#dtable_anims', { 'autofit' : [5], 'unsorting' : [5] }),
 			'chois_marche' : init_datatable('#dtable_chois_marche', { 'autofit' : [4], 'unsorting' : [1, 2, 4] }),
 			'chois_projet' : init_datatable('#dtable_chois_projet', { 'autofit' : [5], 'unsorting' : [5] }),

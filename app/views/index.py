@@ -331,3 +331,22 @@ def consult_compte(_req) :
 				output = HttpResponse(json.dumps(form_modif_util.errors), content_type = 'application/json')
 
 	return output
+
+'''
+Affichage des alertes
+_req : Objet requête
+'''
+@can_access()
+def get_alert(_req) :
+
+	# Import
+	from django.shortcuts import render
+
+	output = None
+
+	if _req.method == 'GET' :
+
+		# Affichage du template
+		output = render(_req, './extras/get_alert.html', { 'title' : 'Alertes' })
+
+	return output

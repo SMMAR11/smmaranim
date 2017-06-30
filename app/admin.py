@@ -12,6 +12,11 @@ from django.contrib.auth.models import User
 admin.site.disable_action('delete_selected')
 
 class Organisme(admin.ModelAdmin) :
+
+	def get_readonly_fields(self, _req, _obj = None) :
+		if _obj : return self.readonly_fields + ('est_prest',)
+		return self.readonly_fields
+
 	actions = [admin.actions.delete_selected]
 	fields = ['nom_org', 'est_prest', 'coul_org']
 	list_display = ['nom_org']

@@ -20,7 +20,8 @@ urlpatterns = [
 	url(r'^admin/', admin.site.urls),
     url(r'^index.html$', index.index, name = 'index'),
     url(r'^$', index.index, name = 'index'),
-    url(r'^consulter-compte.html$', index.consult_compte, name = 'consult_compte')
+    url(r'^consulter-compte.html$', index.consult_compte, name = 'consult_compte'),
+    url(r'^alertes/$', index.get_alert, name = 'get_alert')
 ]
 
 # Détermination de l'URL pour chacun des modules
