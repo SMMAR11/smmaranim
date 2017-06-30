@@ -216,12 +216,14 @@ def consult_anim(_req, _a) :
 
 	# Imports
 	from app.form_templates.gest_anim import ger_bilan
+	from app.forms.gest_anim import ClonerBilan
 	from app.forms.gest_anim import GererBilan
 	from app.forms.gest_anim import GererBilanAnimation
 	from app.forms.gest_anim import GererPoint
 	from app.functions.modal_init import sub as modal_init
 	from app.functions.yes_or_no import sub as yes_or_no
 	from app.models import TAnimation
+	from app.models import TBilan
 	from app.models import TUtilisateur
 	from django.core.urlresolvers import reverse
 	from django.forms import formset_factory
@@ -407,5 +409,133 @@ def consult_anim(_req, _a) :
 
 					# Affichage des erreurs
 					output = HttpResponse(json.dumps(erreurs), content_type = 'application/json')
+
+			# CLonage du bilan
+			if _req.GET['action'] == 'cloner-bilan' :
+
+				# Soumission du formulaire
+				form_clon_bilan = ClonerBilan(
+					_req.POST, kw_anim = obj_anim, prefix = 'ClonerBilan'
+				)
+
+				if form_clon_bilan.is_valid() :
+
+					# Stockage des données du formulaire
+					cleaned_data = form_clon_bilan.cleaned_data
+					val_bilan = cleaned_data.get('zl_bilan')
+
+					# Obtention d'une instance TBilan + tentative d'obtention d'une instance TBilanAnimation
+					obj_bilan_clone = TBilan.objects.get(pk = val_bilan)
+					obj_ba_clone = obj_bilan_clone.get_ba()
+
+					# Initialisation des clones
+					clonings = [{
+						'field_id' : '#id_nom_refer_bilan',
+						'field_value' : obj_bilan_clone.get_nom_refer_bilan(),
+						'type' : 'text' 
+					}, {
+						'field_id' : '#id_prenom_refer_bilan',
+						'field_value' : obj_bilan_clone.get_prenom_refer_bilan(),
+						'type' : 'text' 
+					}, {
+						'field_id' : '#id_fonct_refer_bilan',
+						'field_value' : obj_bilan_clone.get_fonct_refer_bilan(),
+						'type' : 'text' 
+					}, {
+						'field_id' : '#id_struct_refer_bilan',
+						'field_value' : obj_bilan_clone.get_struct_refer_bilan(),
+						'type' : 'text' 
+					}, {
+						'field_id' : '#id_comm_bilan',
+						'field_value' : obj_bilan_clone.get_comm_bilan(),
+						'type' : 'text' 
+					}]
+
+					# Initialisation des formsets à réinitialiser
+					formsets = []
+
+					if obj_ba_clone :
+
+						# Suite de l'initialisation des clones
+						extra_clonings = [{
+							'field_id' : '#id_titre_ba',
+							'field_value' : obj_ba_clone.get_titre_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : '#id_nbre_pers_pres_ba',
+							'field_value' : obj_ba_clone.get_nbre_pers_pres_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : '#id_nbre_pers_prev_ba',
+							'field_value' : obj_ba_clone.get_nbre_pers_prev_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : '#id_theme_ba',
+							'field_value' : obj_ba_clone.get_theme_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : '#id_themat_abord_ba',
+							'field_value' : obj_ba_clone.get_themat_abord_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : '#id_deroul_ba',
+							'field_value' : obj_ba_clone.get_deroul_ba(),
+							'type' : 'text' 
+						}, {
+							'field_id' : 'en_inter',
+							'field_value' : str(obj_ba_clone.get_en_inter()),
+							'type' : 'radio' 
+						}, {
+							'field_id' : 'en_exter',
+							'field_value' : str(obj_ba_clone.get_en_exter()),
+							'type' : 'radio' 
+						}, {
+							'field_id' : 'eval_ba',
+							'field_value' : obj_ba_clone.get_eval_ba(),
+							'type' : 'radio' 
+						}, {
+							'field_id' : 'zcc_plaq',
+							'field_value' : [p.get_pk() for p in obj_ba_clone.get_plaq().all()],
+							'type' : 'checkbox' 
+						}]
+
+						# Suite de l'initialisation des clones (prise en compte des points positifs/négatifs)
+						for index, p in enumerate(obj_ba_clone.get_point().all()) :
+							extra_clonings += [{
+								'field_id' : '#id_form-{}-int_point'.format(index),
+								'field_value' : p.get_int_point(),
+								'type' : 'text' 
+							}, {
+								'field_id' : '#id_form-{}-comm_neg_point'.format(index),
+								'field_value' : p.get_comm_neg_point(),
+								'type' : 'text' 
+							}, {
+								'field_id' : '#id_form-{}-comm_pos_point'.format(index),
+								'field_value' : p.get_comm_pos_point(),
+								'type' : 'text' 
+							}]
+
+						# Fin d'initialisation des clones
+						clonings += extra_clonings
+
+						# Empilement des formsets à réinitialiser
+						formsets.append(['#formset_ger_point', obj_ba_clone.get_point().count()])
+
+					# Clonage du formulaire
+					output = HttpResponse(
+						json.dumps({ 'success' : {
+							'clonings' : clonings, 'reinit_formsets' : formsets
+						}}), content_type = 'application/json'
+					)
+
+				else :
+
+					# Affichage des erreurs
+					output = HttpResponse(
+						json.dumps({ '{}-{}'.format(
+							form_clon_bilan.prefix, cle
+						) : val for cle, val in form_clon_bilan.errors.items() }),
+						content_type = 'application/json'
+					)
 
 	return output

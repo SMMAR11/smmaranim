@@ -169,6 +169,54 @@ function ajax(_e) {
 							$('#' + elem_to_remove).remove();
 						}
 					}
+
+					// Clonage d'un formulaire
+					if(datas['success']['clonings']) {
+
+						// Réinitialisation de formsets
+						if (datas['success']['reinit_formsets']) {
+							for (var i = 0; i < datas['success']['reinit_formsets'].length; i += 1) {
+								var elem = datas['success']['reinit_formsets'][i];
+
+								// Suppression de tous les formulaires existants + réindexage
+								$(elem[0]).find('.formset-form').remove();
+								reindex_formset(elem[0]);
+
+								// Ajout de X formulaires dans le formset afin de cloner des données à l'intérieur de
+								// ceux-ci
+								for (var j = 0; j < elem[1]; j += 1) {
+									add_form_to_formset(elem[0].substr(9));
+								}
+							}
+						}
+
+						// Clonage
+						for (var i = 0; i < datas['success']['clonings'].length; i += 1) {
+							var elem = datas['success']['clonings'][i];
+							if (elem['field_id'] && elem['field_value'] && elem['type']) {
+
+								// Cas d'un champ texte
+								if (elem['type'] == 'text') {
+									$(elem['field_id']).val(elem['field_value']);
+								}
+
+								// Cas d'un champ bouton radio
+								if (elem['type'] == 'radio') {
+									$('input[name="' + elem['field_id'] + '"]').val([elem['field_value']]);
+								}
+
+								// Cas d'une case à cocher
+								if (elem['type'] == 'checkbox') {
+									for (var j = 0; j < elem['field_value'].length; j += 1) {
+										var val = elem['field_value'][j];
+										$('input[name="' + elem['field_id'] + '"][value="' + val + '"]').prop(
+											'checked', true
+										);
+									}
+								}
+							}
+						}
+					}
 				}
 				else {
 					if (req == 'post') {

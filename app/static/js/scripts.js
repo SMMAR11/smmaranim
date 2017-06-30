@@ -4,6 +4,7 @@ var date_radiobuttons = ['AjouterExposition-rb_dt_expos', 'ModifierExposition-rb
 var forms = [
 	'chois_pm__gest_prep_real',
 	'chois_pm__projet',
+	'clon_bilan',
 	'filtr_anim',
 	'filtr_marche',
 	'filtr_projet',

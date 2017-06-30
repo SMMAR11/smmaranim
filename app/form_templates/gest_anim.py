@@ -9,6 +9,7 @@ Retourne une chaîne de caractères
 def ger_bilan(_req, _kwargs) :
 
 	# Imports
+	from app.forms.gest_anim import ClonerBilan
 	from app.forms.gest_anim import GererBilan
 	from app.forms.gest_anim import GererBilanAnimation
 	from app.forms.gest_anim import GererPoint
@@ -16,6 +17,9 @@ def ger_bilan(_req, _kwargs) :
 	from django.template.context_processors import csrf
 
 	kwargs = { cle : val for cle, val in _kwargs.items() }
+
+	# Initialisation du formulaire de clonage
+	form_clon_bilan = form_init(ClonerBilan(kw_anim = kwargs['kw_anim'], prefix = 'ClonerBilan'))
 
 	if kwargs['kw_anim'].get_est_anim() == True :
 
@@ -120,6 +124,10 @@ def ger_bilan(_req, _kwargs) :
 		extra_content = ''
 
 	return '''
+	<form action="?action=cloner-bilan" method="post" name="form_clon_bilan" onsubmit="ajax(event);">
+		<input name="csrfmiddlewaretoken" type="hidden" value="{}">
+		{}
+	</form>
 	<form action="?action=gerer-bilan" enctype="multipart/form-data" method="post" name="form_ger_bilan"
 	onsubmit="ajax(event);">
 		<input name="csrfmiddlewaretoken" type="hidden" value="{}">
@@ -127,4 +135,10 @@ def ger_bilan(_req, _kwargs) :
 		<button class="center-block custom-button main-button" type="submit">Valider</button>
 	</form>
 	{}
-	'''.format(csrf(_req)['csrf_token'], content, extra_content)
+	'''.format(
+		csrf(_req)['csrf_token'],
+		form_clon_bilan['zl_bilan'],
+		csrf(_req)['csrf_token'],
+		content,
+		extra_content
+	)

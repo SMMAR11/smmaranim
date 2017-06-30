@@ -399,3 +399,30 @@ class GererPoint(forms.ModelForm) :
 		)
 
 		return formset
+
+class ClonerBilan(forms.Form) :
+
+	# Import
+	from smmaranim.custom_settings import EMPTY_VALUE
+
+	# Champ
+	zl_bilan = forms.ChoiceField(choices = [EMPTY_VALUE], label = 'Bilan à cloner')
+
+	def __init__(self, *args, **kwargs) :
+
+		# Initialisation des arguments
+		kw_anim = kwargs.pop('kw_anim')
+
+		super(ClonerBilan, self).__init__(*args, **kwargs)
+
+		# Initialisation des choix de la liste déroulante des bilans
+		bilans = []
+		for pm in kw_anim.get_projet().get_org().get_pm().all() :
+			for p in pm.get_projet().all() :
+				bs = []
+				for a in p.get_anim().exclude(pk = kw_anim.get_pk()) :
+					if a.get_bilan__object() : bs.append((a.get_bilan__object().get_pk(), a.get_bilan__object()))
+				if len(bs) > 0 : bilans.append([p, bs])
+
+		# Définition des choix de la liste déroulante des bilans
+		self.fields['zl_bilan'].choices += bilans
