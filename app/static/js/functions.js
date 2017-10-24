@@ -159,7 +159,7 @@ function ajax(_e) {
 							var elem = datas['success']['elements'][i];
 
 							// Renommage de l'élément à supprimer
-							elem_to_remove = $(elem[0]).attr('id') + '__old';
+							var elem_to_remove = $(elem[0]).attr('id') + '__old';
 							$(elem[0]).attr('id', elem_to_remove);
 
 							// Insertion du nouvel élément
@@ -216,6 +216,11 @@ function ajax(_e) {
 								}
 							}
 						}
+					}
+
+					// Réinitialisation d'un formulaire
+					if (datas['success']['reset'] && datas['success']['reset'] == true) {
+						$('form[name="form_' + suffix + '"]')[0].reset();
 					}
 				}
 				else {

@@ -36,6 +36,7 @@ def ger_anim(_req, _inst) :
 
 	# Imports
 	from app.forms.gest_anim import GererAnimation
+	from app.forms.gest_projets import GererProjet
 	from app.functions.form_init import sub as form_init
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TAnimation
@@ -45,6 +46,7 @@ def ger_anim(_req, _inst) :
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
 	from django.shortcuts import render
+	from django.template.context_processors import csrf
 	import json
 
 	output = None
@@ -69,45 +71,112 @@ def ger_anim(_req, _inst) :
 		# Définition du contenu de la balise <title/> (également utile à d'autres endroits)
 		title = 'Modifier une animation' if obj_anim else 'Ajouter une animation'
 
+		# Déclaration des fenêtres modales
+		modals = [modal_init('ger_anim', title)]
+		if not obj_anim :
+
+			# Initialisation du formulaire et de ses attributs
+			form_ger_projet = form_init(GererProjet(kw_util = obj_util_connect))
+
+			modals.append(modal_init(
+				'ajout_projet',
+				'Ajouter un projet',
+				'''
+				<form action="?action=ajouter-projet" method="post" name="form_ajout_projet" onsubmit="ajax(event);">
+					<input name="csrfmiddlewaretoken" type="hidden" value="{}">
+					{}
+					{}
+					{}
+					<div class="row">
+						<div class="col-sm-6">{}</div>
+						<div class="col-sm-6">{}</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6">{}</div>
+						<div class="col-sm-6">{}</div>
+					</div>
+					<button class="center-block custom-button main-button" type="submit">Valider</button>
+				</form>
+				'''.format(
+					csrf(_req)['csrf_token'],
+					form_ger_projet['zl_pm'] if 'zl_pm' in form_ger_projet else '',
+					form_ger_projet['int_projet'],
+					form_ger_projet['id_type_public'],
+					form_ger_projet['nom_refer_projet'],
+					form_ger_projet['prenom_refer_projet'],
+					form_ger_projet['courr_refer_projet'],
+					form_ger_projet['tel_refer_projet']
+				)
+			))
+
 		# Affichage du template
 		output = render(_req, './gest_anim/ger_anim.html', {
 			'form_ger_anim' : form_init(form_ger_anim),
 			'a' : obj_anim,
 			'b' : obj_anim.get_bilan__object() if obj_anim else None,
-			'modals' : [modal_init('ger_anim', title)],
+			'modals' : modals,
 			'title' : title
 		})
 
 	else :
+		if 'action' in _req.GET :
+			if _req.GET['action'] == 'ajouter-projet' :
 
-		# Vérification du droit d'accès
-		if obj_anim : obj_util_connect.can_access(obj_anim.get_projet().get_org(), False)
+				# Soumission du formulaire
+				form_ger_projet = GererProjet(_req.POST, kw_util = obj_util_connect)
 
-		# Soumission du formulaire
-		form_ger_anim = GererAnimation(
-			_req.POST,
-			instance = obj_anim,
-			kw_org = obj_util_connect.get_org()
-		)
+				if form_ger_projet.is_valid() :
 
-		if form_ger_anim.is_valid() :
+					# Création/modification d'une instance TProjet
+					obj_projet_valid = form_ger_projet.save()
 
-			# Création/modification d'une instance TAnimation
-			obj_anim_valid = form_ger_anim.save()
+					# Rafraichissement de la liste des projets et sélection automatique du nouveau projet créé
+					_form_ger_anim = GererAnimation(kw_org = obj_util_connect.get_org())
+					_form_ger_anim.fields['zl_projet'].initial = obj_projet_valid.get_pk()
+					_form_ger_anim = form_init(_form_ger_anim)
 
-			# Affichage du message de succès
-			output = HttpResponse(
-				json.dumps({ 'success' : {
-					'message' : 'L\'animation a été {} avec succès.'.format('modifiée' if obj_anim else 'ajoutée'),
-					'redirect' : reverse('consult_anim', args = [obj_anim_valid.get_pk()])
-				}}),
-				content_type = 'application/json'
-			)
+					# Désaffichage du formulaire d'ajout d'un projet
+					output = HttpResponse(json.dumps({ 'success' : {
+						'elements' : [['#fw_zl_projet', _form_ger_anim['zl_projet']]],
+						'modal_status' : 'hide',
+						'reset' : True 
+					}}), content_type = 'application/json')
+
+				else :
+
+					# Affichage des erreurs
+					output = HttpResponse(json.dumps(form_ger_projet.errors), content_type = 'application/json')
 
 		else :
 
-			# Affichage des erreurs
-			output = HttpResponse(json.dumps(form_ger_anim.errors), content_type = 'application/json')
+			# Vérification du droit d'accès
+			if obj_anim : obj_util_connect.can_access(obj_anim.get_projet().get_org(), False)
+
+			# Soumission du formulaire
+			form_ger_anim = GererAnimation(
+				_req.POST,
+				instance = obj_anim,
+				kw_org = obj_util_connect.get_org()
+			)
+
+			if form_ger_anim.is_valid() :
+
+				# Création/modification d'une instance TAnimation
+				obj_anim_valid = form_ger_anim.save()
+
+				# Affichage du message de succès
+				output = HttpResponse(
+					json.dumps({ 'success' : {
+						'message' : 'L\'animation a été {} avec succès.'.format('modifiée' if obj_anim else 'ajoutée'),
+						'redirect' : reverse('consult_anim', args = [obj_anim_valid.get_pk()])
+					}}),
+					content_type = 'application/json'
+				)
+
+			else :
+
+				# Affichage des erreurs
+				output = HttpResponse(json.dumps(form_ger_anim.errors), content_type = 'application/json')
 
 	return output
 

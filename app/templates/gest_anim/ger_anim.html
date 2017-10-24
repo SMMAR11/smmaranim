@@ -13,6 +13,10 @@
 			<span class="important">Attention, si vous décidez de modifier la valeur du champ « L'animation est-elle un rendez-vous ? », alors le bilan précédemment rempli sera supprimé.</span>
 			{% endif %}
 			{% csrf_token %}
+			{% if not a %}
+			<span class="add-icon icon-with-text" data-target="#fm_ajout_projet" data-toggle="modal">Cliquez si l'animation est une animation très ponctuelle</span>
+			<span class="br"></span>
+			{% endif %}
 			{{ form_ger_anim.zl_projet }}
 			{{ form_ger_anim.dt_anim }}
 			<div class="row">

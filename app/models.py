@@ -471,8 +471,9 @@ class TProjet(models.Model) :
 		from smmaranim.custom_settings import ERROR_MESSAGES
 
 		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
-		if not self.get_courr_refer_projet() and not self.get_tel_refer_projet() :
-			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
+		if self.get_nom_refer_projet() :
+			if not self.get_courr_refer_projet() and not self.get_tel_refer_projet() :
+				raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk
@@ -1195,8 +1196,9 @@ class TReservation(models.Model) :
 		from smmaranim.custom_settings import ERROR_MESSAGES
 
 		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
-		if not self.get_courr_refer_reserv() and not self.get_tel_refer_reserv() :
-			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
+		if self.get_nom_refer_reserv() :
+			if not self.get_courr_refer_reserv() and not self.get_tel_refer_reserv() :
+				raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk
@@ -1358,8 +1360,9 @@ class TReferentReservation(models.Model) :
 		from smmaranim.custom_settings import ERROR_MESSAGES
 
 		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
-		if not self.get_courr_rr() and not self.get_tel_rr() :
-			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
+		if self.get_nom_rr() :
+			if not self.get_courr_rr() and not self.get_tel_rr() :
+				raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk
