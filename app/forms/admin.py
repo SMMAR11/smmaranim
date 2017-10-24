@@ -4,6 +4,7 @@
 from app.models import *
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from smmaranim.custom_settings import EMPTY_VALUE
 
 class FUtilisateurCreate(forms.ModelForm) :
 
@@ -110,5 +111,59 @@ class FUtilisateurUpdate(forms.ModelForm) :
         # Liaison avec la table t_droits_utilisateur
         obj.get_du().all().delete()
         for tu in val_type_util : TDroitsUtilisateur.objects.create(code_type_util = tu, id_util = obj)
+
+        return obj
+
+class FEcole(forms.ModelForm) :
+
+    # Import
+    from django.contrib.auth.forms import ReadOnlyPasswordHashField
+
+    # Stockage des types d'établissments
+    type_ecoles = ['ÉCOLE', 'COLLÈGE', 'LYCÉE', 'ÉTUDE SUPÉRIEURE']
+
+    # Champs
+    zl_type_ecole = forms.ChoiceField(
+        choices = [EMPTY_VALUE] + [(elem, elem) for elem in type_ecoles],
+        label = 'Type de l\'établissement',
+        required = False
+    )
+    zs_nom_ecole = forms.CharField(label = 'Nom de l\'établissement')
+
+    class Meta :
+        fields = ['code_comm']
+        model = TEcole
+
+    def __init__(self, *args, **kwargs) :
+        super(FEcole, self).__init__(*args, **kwargs)
+
+        if self.instance.get_pk() :
+
+            # Initialisation de la valeur de chaque champ (première phase)
+            type_ecole = None
+            nom_ecole = self.instance.get_nom_ecole()
+
+            # Initialisation de la valeur de chaque champ (dernière phase)
+            for te in [elem[0] for elem in self.fields['zl_type_ecole'].choices if elem[0]] :
+                if nom_ecole.startswith(te) :
+                    type_ecole = te
+                    nom_ecole = nom_ecole.replace('{} '.format(te), '')
+                    break
+
+            # Définition de la valeur initiale pour chaque champ
+            self.fields['zl_type_ecole'].initial = type_ecole
+            self.fields['zs_nom_ecole'].initial = nom_ecole
+
+    def save(self, *args, **kwargs) :
+
+        # Stockage des données du formulaire
+        cleaned_data = self.cleaned_data
+        val_type_ecole = cleaned_data.get('zl_type_ecole')
+        val_nom_ecole = cleaned_data.get('zs_nom_ecole')
+
+        # Création/modification d'une instance TEcole
+        obj = super(FEcole, self).save(*args, **kwargs)
+        obj.nom_ecole = '{} {}'.format(val_type_ecole, val_nom_ecole) if val_type_ecole else val_nom_ecole
+        obj.save()
 
         return obj

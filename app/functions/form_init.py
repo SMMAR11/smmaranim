@@ -248,29 +248,29 @@ def sub(_form) :
 					tds.append('<td>{}</td>'.format(td_content))
 				trs.append('<tr>{}</tr>'.format(''.join(tds)))
 
-				gabarit = '''
-				<div class="field-wrapper" id="fw_{}">
-					<span class="field-label">{}</span>
-					<div class="custom-table" id="dtable_{}">
-						<table border="1" bordercolor="#DDD">
-							<thead>
-								<tr>{}</tr>
-							</thead>
-							<tbody>{}</tbody>
-						</table>
-					</div>
-					<span class="field-error-message"></span>
+			gabarit = '''
+			<div class="field-wrapper" id="fw_{}">
+				<span class="field-label">{}</span>
+				<div class="custom-table" id="dtable_{}">
+					<table border="1" bordercolor="#DDD">
+						<thead>
+							<tr>{}</tr>
+						</thead>
+						<tbody>{}</tbody>
+					</table>
 				</div>
-				'''.format(
-					attr_name,
-					labels[0],
-					attr_name,
-					''.join(['<th>{}</th>'.format(
-						elem if elem != '__zcc__' else '<input type="checkbox" id="id_{}__all" value="__ALL__">' \
-						.format(attr_name)
-					) for elem in labels[1:]]),
-					''.join(trs)
-				)
+				<span class="field-error-message"></span>
+			</div>
+			'''.format(
+				attr_name,
+				labels[0],
+				attr_name,
+				''.join(['<th>{}</th>'.format(
+					elem if elem != '__zcc__' else '<input type="checkbox" id="id_{}__all" value="__ALL__">' \
+					.format(attr_name)
+				) for elem in labels[1:]]),
+				''.join(trs)
+			)
 		elif type_champ == 'Textarea' :
 			gabarit = gabarit_defaut.format(attr_name, champ.label, champ__str)
 		elif type_champ == 'TextInput' :

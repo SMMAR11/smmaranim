@@ -15,9 +15,11 @@
 		<div class="pdf-col-6">{{ attrs_reserv.courr_refer_reserv }}</div>
 		<div class="pdf-col-6">{{ attrs_reserv.tel_refer_reserv }}</div>
 	</div>
+	{% if support %}
 	<div class="pdf-title-2">Aides proposées par le SMMAR</div>
 	<span class="pdf-important">{{ aides_smmar }}</span>
 	{{ attrs_reserv.aides }}
+	{% endif %}
 	<div class="pdf-title-2">Données complémentaires de la réservation</div>
 	{{ attrs_reserv.comm_reserv }}
 </div>

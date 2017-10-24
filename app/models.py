@@ -25,7 +25,15 @@ class TOrganisme(models.Model) :
 
 	# Attributs
 	id_org = models.AutoField(primary_key = True)
-	coul_org = models.CharField(default = 'revert', max_length = 255, verbose_name = 'Couleur HTML hexadécimale')
+	coul_org = models.CharField(
+		default = 'revert',
+		help_text = '''
+		Au format suivant : caractère dièse (#) suivi de six caractères (chiffres ou lettres de A à F inclus). Valeur
+		« revert » acceptée.
+		''',
+		max_length = 255,
+		verbose_name = 'Couleur HTML hexadécimale'
+	)
 	est_prest = models.BooleanField(default = True, verbose_name = 'L\'organisme est-il prestataire ?')
 	nom_org = models.CharField(max_length = 255, verbose_name = 'Nom de l\'organisme')
 
@@ -49,12 +57,13 @@ class TOrganisme(models.Model) :
 
 		# Imports
 		from django.core.exceptions import ValidationError
+		from smmaranim.custom_settings import ERROR_MESSAGES
 		import re
 
 		# Renvoi d'une erreur en cas de renseignement d'une couleur inexistante
 		if self.get_coul_org() != 'revert' :
 			if not re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', self.get_coul_org()) :
-				raise ValidationError({ 'coul_org' : '' })
+				raise ValidationError({ 'coul_org' : ERROR_MESSAGES['invalid'] })
 
 class TUtilisateur(User) :
 
@@ -114,7 +123,8 @@ class TUtilisateur(User) :
 
 	def get_menu(self) :
 
-		# Import
+		# Imports
+		from collections import OrderedDict
 		from smmaranim.custom_settings import MENU
 
 		output = {}
@@ -124,8 +134,12 @@ class TUtilisateur(User) :
 			if val['mod_rights'] == '__ALL__' or set(self.get_type_util__list()).intersection(val['mod_rights']) :
 				output[cle] = val
 
+		# Tri des éléments de chaque module par ordre d'affichage
+		for elem in output.values() :
+			elem['mod_items'] = OrderedDict(sorted(elem['mod_items'].items(), key = lambda l : l[1]['item_rank']))
+
 		# Tri des modules par ordre d'affichage
-		output = dict(sorted(output.items(), key = lambda l : l[1]['mod_rank']))
+		output = OrderedDict(sorted(output.items(), key = lambda l : l[1]['mod_rank']))
 
 		return output
 
@@ -231,15 +245,21 @@ class TPrestatairesMarche(models.Model) :
 				for a in p.get_anim().all() : vals.append(a.get_nbre_dj_anim())
 		output = sum(vals)
 		return '{0:g}'.format(output) if _str == True else output
-	def get_nbre_dj_prep_real_pm(self, _str = True) :
-		output = sum([tdj.get_nbre_dj_tdj() for tdj in self.get_tdj().all()])
+	def get_nbre_dj_prep_real_pm(self, _progr, _str = True) :
+		if _progr == True :
+			output = sum([tdj.get_nbre_dj_tdj_progr() for tdj in self.get_tdj().all()])
+		else :
+			output = sum([tdj.get_nbre_dj_tdj_util() for tdj in self.get_tdj().all()])
 		return '{0:g}'.format(output) if _str == True else output
 	def get_nbre_dj_ap_rest_pm(self, _str = True) :
-		output = self.get_nbre_dj_ap_pm() - \
-		(self.get_nbre_dj_progr_pm('AP', False) + self.get_nbre_dj_prep_real_pm(False))
+		output = self.get_nbre_dj_ap_pm() - self.get_nbre_dj_progr_pm('AP', False)
 		return '{0:g}'.format(output) if _str == True else output
-	def get_nbre_dj_pp_rest_pm(self, _str = True) :
-		output = self.get_nbre_dj_pp_pm() - self.get_nbre_dj_progr_pm('PP', False)
+	def get_nbre_dj_pp_rest_pm(self, _per, _str = True) :
+		terme_1 = self.get_nbre_dj_pp_pm() if _per == False else \
+		self.get_nbre_dj_pp_pm() + self.get_nbre_dj_prep_real_pm(True, False)
+		terme_2 = self.get_nbre_dj_progr_pm('PP', False) if _per == False else \
+		self.get_nbre_dj_progr_pm('PP', False) + self.get_nbre_dj_prep_real_pm(False, False)
+		output = terme_1 - terme_2
 		return '{0:g}'.format(output) if _str == True else output
 
 	def __str__(self) : return '{} - {}'.format(self.get_prest(), self.get_marche())
@@ -253,8 +273,11 @@ class TTransactionDemiJournees(models.Model) :
 	# Attributs
 	id_tdj = models.AutoField(primary_key = True)
 	int_tdj = models.CharField(max_length = 255, verbose_name = 'Intitulé')
-	nbre_dj_tdj = models.FloatField(
-		validators = [MinValueValidator(0.5), valid_dj], verbose_name = 'Nombre de demi-journées'
+	nbre_dj_tdj_progr = models.FloatField(
+		validators = [MinValueValidator(0.5), valid_dj], verbose_name = 'Nombre de demi-journées prévues'
+	)
+	nbre_dj_tdj_util = models.FloatField(
+		default = 0, validators = [MinValueValidator(0), valid_dj], verbose_name = 'Nombre de demi-journées utilisées'
 	)
 	id_pm = models.ForeignKey(TPrestatairesMarche, on_delete = models.CASCADE)
 
@@ -266,14 +289,16 @@ class TTransactionDemiJournees(models.Model) :
 	# Getters
 	def get_pk(self) : return self.pk
 	def get_int_tdj(self) : return self.int_tdj
-	def get_nbre_dj_tdj(self) : return self.nbre_dj_tdj
+	def get_nbre_dj_tdj_progr(self) : return self.nbre_dj_tdj_progr
+	def get_nbre_dj_tdj_util(self) : return self.nbre_dj_tdj_util
 	def get_pm(self) : return self.id_pm
 
-	# Méthode
-	def get_nbre_dj_tdj__str(self) : return '{0:g}'.format(self.get_nbre_dj_tdj())
+	# Méthodes
+	def get_nbre_dj_tdj_progr__str(self) : return '{0:g}'.format(self.get_nbre_dj_tdj_progr())
+	def get_nbre_dj_tdj_util__str(self) : return '{0:g}'.format(self.get_nbre_dj_tdj_util())
 
 	def __str__(self) :
-		return '{} - {} ({} demi-journée(s))'.format(self.get_pm(), self.get_int_tdj(), self.get_nbre_dj_tdj__str())
+		return '{} - {}'.format(self.get_pm(), self.get_int_tdj())
 
 class TTypeIntervention(models.Model) :
 
@@ -374,7 +399,7 @@ class TEcole(models.Model) :
 
 	# Attributs
 	id_ecole = models.AutoField(primary_key = True)
-	nom_ecole = models.CharField(max_length = 255, verbose_name = 'Nom de l\'école')
+	nom_ecole = models.CharField(max_length = 255, verbose_name = 'Nom de l\'établissement')
 	code_comm = models.ForeignKey(TCommune, on_delete = models.CASCADE, verbose_name = 'Commune')
 
 	class Meta :
@@ -416,12 +441,16 @@ class TProjet(models.Model) :
 	# Attributs
 	id_projet = models.AutoField(primary_key = True)
 	comm_projet = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
-	courr_refer_projet = models.EmailField(verbose_name = 'Courriel du contact référent')
+	courr_refer_projet = models.EmailField(blank = True, null = True, verbose_name = 'Courriel du contact référent')
 	int_projet = models.CharField(max_length = 255, verbose_name = 'Intitulé du projet')
 	nom_refer_projet = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
-	prenom_refer_projet = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
+	prenom_refer_projet = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent'
+	)
 	tel_refer_projet = models.CharField(
+		blank = True,
 		max_length = 10,
+		null = True,
 		validators = [RegexValidator(r'^[0-9]{10}')],
 		verbose_name = 'Numéro de téléphone du contact référent'
 	)
@@ -434,6 +463,16 @@ class TProjet(models.Model) :
 		db_table = 't_projet'
 		ordering = ['int_projet']
 		verbose_name = verbose_name_plural = 'T_PROJET'
+
+	def clean(self) :
+
+		# Imports
+		from django.core.exceptions import ValidationError
+		from smmaranim.custom_settings import ERROR_MESSAGES
+
+		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
+		if not self.get_courr_refer_projet() and not self.get_tel_refer_projet() :
+			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk
@@ -577,10 +616,14 @@ class TAnimation(models.Model) :
 	heure_anim = ArrayField(base_field = models.TimeField(), size = 2)
 	lieu_anim = models.CharField(max_length = 255, verbose_name = 'Lieu de l\'animation')
 	nbre_dj_anim = models.FloatField(
+		blank = True,
 		choices = [(elem, str(elem)) for elem in HALF_DAY_CHOICES],
+		null = True,
 		verbose_name = 'Nombre de demi-journées déduites'
 	)
-	num_anim = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Numéro de l\'animation')
+	num_anim = models.PositiveIntegerField(
+		blank = True, null = True, verbose_name = 'Numéro de l\'animation ou du rendez-vous'
+	)
 	code_comm = models.ForeignKey(TCommune, on_delete = models.CASCADE)
 	id_projet = models.ForeignKey(TProjet, on_delete = models.CASCADE, verbose_name = 'Projet')
 	id_struct = models.ForeignKey(TStructure, on_delete = models.CASCADE, verbose_name = 'Structure d\'accueil')
@@ -597,7 +640,7 @@ class TAnimation(models.Model) :
 	def get_est_anim(self) : return self.est_anim
 	def get_heure_anim(self) : return self.heure_anim
 	def get_lieu_anim(self) : return self.lieu_anim
-	def get_nbre_dj_anim(self) : return self.nbre_dj_anim
+	def get_nbre_dj_anim(self) : return self.nbre_dj_anim or 0
 	def get_num_anim(self) : return self.num_anim
 	def get_projet(self) : return self.id_projet
 	def get_struct(self) : return self.id_struct
@@ -611,16 +654,23 @@ class TAnimation(models.Model) :
 		# Import
 		from app.functions.attributes_init import sub
 
-		return sub({
+		# Initialisation des attributs de l'animation
+		attrs = {
 			'comm' : { 'label' : 'Commune accueillant l\'animation', 'value' : self.get_comm() },
 			'dt_heure_anim' : { 'label' : 'Date et heure de l\'animation', 'value' : self.get_dt_heure_anim__str() },
 			'lieu_anim' : { 'label' : 'Lieu de l\'animation', 'value' : self.get_lieu_anim() },
 			'nat_anim' : { 'label' : 'Nature de l\'animation', 'value' : self.get_nat_anim() },
-			'nbre_dj_anim' : { 'label' : 'Nombre de demi-journées déduites', 'value' : self.get_nbre_dj_anim__str() },
 			'prest' : { 'label' : 'Organisme', 'value' : self.get_projet().get_org() },
 			'struct' : { 'label' : 'Structure d\'accueil', 'value' : self.get_struct() },
 			'projet' : { 'label' : 'Projet', 'value' : self.get_projet() }
-		}, _pdf)
+		}
+
+		if self.get_projet().get_org().get_est_prest() == True :
+			attrs['nbre_dj_anim'] = {
+				'label' : 'Nombre de demi-journées déduites', 'value' : self.get_nbre_dj_anim__str()
+			}
+
+		return sub(attrs, _pdf)
 
 	def get_bilan__object(self) : return self.get_bilan().get() if self.get_bilan().count() > 0 else None
 	def get_dt_anim__str(self) :
@@ -628,7 +678,7 @@ class TAnimation(models.Model) :
 	def get_dt_heure_anim__str(self) :
 		return '{} {}'.format(self.get_dt_anim__str(), '-'.join(self.get_heure_anim__str()))
 	def get_nat_anim(self) :
-		return 'Anim {}'.format(self.get_num_anim()) if self.get_est_anim() == True else 'RDV'
+		return '{} {}'.format('Anim' if self.get_est_anim() == True else 'RDV', self.get_num_anim() or '')
 	def get_nbre_dj_anim__str(self) : return '{0:g}'.format(self.get_nbre_dj_anim())
 	def get_heure_anim__str(self) :
 		from app.functions.get_local_format import sub; return [sub(elem) for elem in self.get_heure_anim() if elem]
@@ -701,7 +751,11 @@ class TBilan(models.Model) :
 
 		return sub(attrs_bilan, _pdf) if _initial_dict == False else attrs_bilan
 
-	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_refer_bilan(), self.get_prenom_refer_bilan())
+	def get_nom_complet(self) :
+		if self.get_nom_refer_bilan() or self.get_prenom_refer_bilan() :
+			return '{} {}'.format(self.get_nom_refer_bilan(), self.get_prenom_refer_bilan())
+		else :
+			return None
 
 	def __str__(self) : return '{} [BILAN]'.format(self.get_anim())
 
@@ -794,7 +848,7 @@ class TBilanAnimation(TBilan) :
 		return 'animations/revues_de_presse/{}.{}'.format(sub(), _fn.split('.')[-1])
 
 	# Attributs
-	deroul_ba = models.TextField(verbose_name = 'Déroulement et méthodes adoptées')
+	deroul_ba = models.TextField(blank = True, null = True, verbose_name = 'Déroulement et méthodes adoptées')
 	en_exter = models.BooleanField(default = False, verbose_name = 'Y a-t-il eu des activités en extérieur ?')
 	en_inter = models.BooleanField(default = False, verbose_name = 'Y a-t-il eu des activités en intérieur ?')
 	eval_ba = models.CharField(
@@ -803,8 +857,9 @@ class TBilanAnimation(TBilan) :
 		max_length = 4,
 		verbose_name = 'Évaluation de l\'animation'
 	)
-	nbre_pers_pres_ba = models.PositiveIntegerField(verbose_name = 'Nombre de personnes présentes à l\'animation')
-	nbre_pers_prev_ba = models.PositiveIntegerField(verbose_name = 'Nombre de personnes prévues à l\'animation')
+	nbre_pers_pres_ba = models.PositiveIntegerField(
+		blank = True, null = True, verbose_name = 'Nombre de personnes présentes à l\'animation'
+	)
 	outil_ba = models.FileField(
 		blank = True,
 		null = True,
@@ -855,7 +910,6 @@ class TBilanAnimation(TBilan) :
 		verbose_name = 'Revue de presse 3 de l\'animation <span class="fl-complement">(fichier PDF)</span>'
 	)
 	themat_abord_ba = models.TextField(verbose_name = 'Thématiques abordées')
-	theme_ba = models.CharField(max_length = 255, verbose_name = 'Thème de l\'animation')
 	titre_ba = models.CharField(max_length = 255, verbose_name = 'Titre de l\'animation')
 
 	# Relation
@@ -873,7 +927,6 @@ class TBilanAnimation(TBilan) :
 	def get_en_inter(self) : return self.en_inter
 	def get_eval_ba(self) : return self.eval_ba
 	def get_nbre_pers_pres_ba(self) : return self.nbre_pers_pres_ba
-	def get_nbre_pers_prev_ba(self) : return self.nbre_pers_prev_ba
 	def get_outil_ba(self) : return self.outil_ba
 	def get_photo_1_ba(self) : return self.photo_1_ba
 	def get_photo_2_ba(self) : return self.photo_2_ba
@@ -883,7 +936,6 @@ class TBilanAnimation(TBilan) :
 	def get_rdp_2_ba(self) : return self.rdp_2_ba
 	def get_rdp_3_ba(self) : return self.rdp_3_ba
 	def get_themat_abord_ba(self) : return self.themat_abord_ba
-	def get_theme_ba(self) : return self.theme_ba
 	def get_titre_ba(self) : return self.titre_ba
 
 	# Autres getters
@@ -910,9 +962,6 @@ class TBilanAnimation(TBilan) :
 		attrs_ba['nbre_pers_pres_ba'] = {
 			'label' : 'Nombre de personnes présentes à l\'animation', 'value' : self.get_nbre_pers_pres_ba()
 		}
-		attrs_ba['nbre_pers_prev_ba'] = {
-			'label' : 'Nombre de personnes prévues à l\'animation', 'value' : self.get_nbre_pers_prev_ba()
-		}
 		attrs_ba['outil_ba'] = {
 			'download' : True,
 			'label' : 'Télécharger l\'outil créé spécialement pour l\'animation',
@@ -936,8 +985,8 @@ class TBilanAnimation(TBilan) :
 			'label' : 'Point(s) positif(s)/négatif(s) de l\'animation',
 			'value' : [[
 				elem.get_int_point(),
-				elem.get_comm_pos_point() or '-' if _pdf == True else '',
-				elem.get_comm_neg_point() or '-' if _pdf == True else ''
+				elem.get_comm_pos_point() or '-',
+				elem.get_comm_neg_point() or '-'
 			] for elem in self.get_point().all()],
 			'table' : True,
 			'table_header' : [
@@ -961,7 +1010,6 @@ class TBilanAnimation(TBilan) :
 			'value' : self.get_rdp_3_ba__href()
 		}
 		attrs_ba['themat_abord_ba'] = { 'label' : 'Thématiques abordées', 'value' : self.get_themat_abord_ba() }
-		attrs_ba['theme_ba'] = { 'label' : 'Thème de l\'animation', 'value' : self.get_theme_ba() }
 		attrs_ba['titre_ba'] = { 'label' : 'Titre de l\'animation', 'value' : self.get_titre_ba() }
 
 		return attributes_init(attrs_ba, _pdf)
@@ -1099,7 +1147,7 @@ class TReservation(models.Model) :
 	id_reserv = models.AutoField(primary_key = True)
 	borne_dt_reserv = ArrayField(base_field = models.CharField(max_length = 2), size = 2)
 	comm_reserv = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
-	courr_refer_reserv = models.EmailField(verbose_name = 'Courriel du contact référent')
+	courr_refer_reserv = models.EmailField(blank = True, null = True, verbose_name = 'Courriel du contact référent')
 	doit_chercher = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il chercher l\'outil ?')
 	doit_demonter = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il démonter l\'outil ?')
 	doit_livrer = models.BooleanField(default = False, verbose_name = 'Le SMMAR doit-il livrer l\'outil ?')
@@ -1111,7 +1159,9 @@ class TReservation(models.Model) :
 	ou_demonter = models.CharField(blank = True, max_length = 255, null = True, verbose_name = 'Où ?')
 	ou_livrer = models.CharField(blank = True, max_length = 255, null = True, verbose_name = 'Où ?')
 	ou_monter = models.CharField(blank = True, max_length = 255, null = True, verbose_name = 'Où ?')
-	prenom_refer_reserv = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
+	prenom_refer_reserv = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent'
+	)
 	quand_chercher = models.DateTimeField(
 		blank = True, null = True, verbose_name = 'Quand ? <span class="fl-complement">(JJ/MM/AAAA HH:MM)</span>'
 	)
@@ -1125,7 +1175,9 @@ class TReservation(models.Model) :
 		blank = True, null = True, verbose_name = 'Quand ? <span class="fl-complement">(JJ/MM/AAAA HH:MM)</span>'
 	)
 	tel_refer_reserv = models.CharField(
+		blank = True,
 		max_length = 10,
+		null = True, 
 		validators = [RegexValidator(r'^[0-9]{10}')],
 		verbose_name = 'Numéro de téléphone du contact référent'
 	)
@@ -1135,6 +1187,16 @@ class TReservation(models.Model) :
 	class Meta :
 		db_table = 't_reservation'
 		verbose_name = verbose_name_plural = 'T_RESERVATION'
+
+	def clean(self) :
+
+		# Imports
+		from django.core.exceptions import ValidationError
+		from smmaranim.custom_settings import ERROR_MESSAGES
+
+		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
+		if not self.get_courr_refer_reserv() and not self.get_tel_refer_reserv() :
+			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk
@@ -1269,12 +1331,16 @@ class TReferentReservation(models.Model) :
 
 	# Attributs
 	id_rr = models.AutoField(primary_key = True)
-	courr_rr = models.EmailField(verbose_name = 'Courriel du contact référent')
+	courr_rr = models.EmailField(blank = True, null = True, verbose_name = 'Courriel du contact référent')
 	est_princ = models.BooleanField(default = False)
 	nom_rr = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
-	prenom_rr = models.CharField(max_length = 255, verbose_name = 'Prénom du contact référent')
+	prenom_rr = models.CharField(
+		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent'
+	)
 	tel_rr = models.CharField(
+		blank = True,
 		max_length = 10,
+		null = True,
 		validators = [RegexValidator(r'^[0-9]{10}')],
 		verbose_name = 'Numéro de téléphone du contact référent'
 	)
@@ -1284,6 +1350,16 @@ class TReferentReservation(models.Model) :
 		db_table = 't_referent_reservation'
 		ordering = ['nom_rr', 'prenom_rr']
 		verbose_name = verbose_name_plural = 'T_REFERENT_RESERVATION'
+
+	def clean(self) :
+
+		# Imports
+		from django.core.exceptions import ValidationError
+		from smmaranim.custom_settings import ERROR_MESSAGES
+
+		# Renvoi d'une erreur si aucune adresse électronique et aucun numéro de téléphone
+		if not self.get_courr_rr() and not self.get_tel_rr() :
+			raise ValidationError({ '__all__' : ERROR_MESSAGES['email_or_phone_number'] })
 
 	# Getters
 	def get_pk(self) : return self.pk

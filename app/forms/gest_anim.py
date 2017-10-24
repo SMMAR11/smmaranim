@@ -25,11 +25,14 @@ class FiltrerAnimation(forms.Form) :
 
 		super(FiltrerAnimation, self).__init__(*args, **kwargs)
 
+		# Initialisation des organismes dont le calendrier des animations peut être consulté
+		if 'A' in self.kw_util.get_type_util__list() or self.kw_util.get_org().get_est_prest() == False :
+			zl_org__queryset = TOrganisme.objects.all()
+		else :
+			zl_org__queryset = TOrganisme.objects.filter(pk = self.kw_util.get_org().get_pk())
+
 		# Définition des choix de chaque liste déroulante, excepté celle des mois
-		self.fields['zl_org'].queryset = \
-		TOrganisme.objects.all() if 'A' in self.kw_util.get_type_util__list() else TOrganisme.objects.filter(
-			pk = self.kw_util.get_org().get_pk()
-		)
+		self.fields['zl_org'].queryset = zl_org__queryset
 		self.fields['zl_annee'].choices = \
 		[(elem, elem) for elem in range(date.today().year + 1, YEAR_OF_CREATION - 1, -1)]
 
@@ -37,8 +40,8 @@ class FiltrerAnimation(forms.Form) :
 		initial = { 'zl_org' : self.kw_util.get_org(), 'zl_mois' : date.today().month, 'zl_annee' : date.today().year }
 		for cle, val in initial.items() : self.fields[cle].initial = val
 
-		# Suppression de l'élément vide si l'utilisateur ne possède pas le rôle administrateur
-		if 'A' not in self.kw_util.get_type_util__list() :
+		# Suppression de l'élément vide si l'utilisateur ne possède pas le rôle administrateur ou n'est pas prestataire
+		if zl_org__queryset.count() == 1 :
 			self.fields['zl_org'].empty_label = None; self.fields['zl_org'].required = True
 
 	def get_calendar(self, _req, *args, **kwargs) :
@@ -160,10 +163,7 @@ class GererAnimation(forms.ModelForm) :
 
 		fields = ['dt_anim', 'est_anim', 'id_struct', 'lieu_anim', 'num_anim', 'nbre_dj_anim']
 		model = TAnimation
-		widgets = {
-			'est_anim' : forms.RadioSelect(choices = [(0, 'Oui'), (1, 'Non')]),
-			'num_anim' : forms.NumberInput(attrs = { 'may-be-required' : True })
-		}
+		widgets = { 'est_anim' : forms.RadioSelect(choices = [(0, 'Oui'), (1, 'Non')]) }
 
 	def __init__(self, *args, **kwargs) :
 
@@ -173,7 +173,6 @@ class GererAnimation(forms.ModelForm) :
 
 		# Initialisation des arguments
 		instance = kwargs.get('instance', None)
-		kw_est_anim = kwargs.pop('kw_est_anim', None)
 		kw_org = kwargs.pop('kw_org')
 
 		# Mise en forme de certaines données
@@ -203,12 +202,11 @@ class GererAnimation(forms.ModelForm) :
 			}
 			for cle, val in initial.items() : self.fields[cle].initial = val
 
-		# Gestion du champ "Numéro de l'animation"
-		if kw_est_anim is not None :
-			if kw_est_anim == 1 :
-				self.fields['num_anim'].required = True
-			else :
-				del self.fields['num_anim']
+		# Gestion du champ nbre_dj_anim (requis si l'organisme est prestataire)
+		if kw_org.get_est_prest() == True :
+			self.fields['nbre_dj_anim'].required = True
+		else :
+			del self.fields['nbre_dj_anim']
 
 	def save(self, commit = True) :
 
@@ -257,7 +255,6 @@ class GererBilanAnimation(forms.ModelForm) :
 			'fonct_refer_bilan',
 			'outil_ba',
 			'nbre_pers_pres_ba',
-			'nbre_pers_prev_ba',
 			'nom_refer_bilan',
 			'photo_1_ba',
 			'photo_2_ba',
@@ -268,7 +265,6 @@ class GererBilanAnimation(forms.ModelForm) :
 			'rdp_3_ba',
 			'struct_refer_bilan',
 			'themat_abord_ba',
-			'theme_ba',
 			'titre_ba'
 		]
 		model = TBilanAnimation

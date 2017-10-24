@@ -323,11 +323,13 @@ def consult_marche(_req, _m) :
 						str(pm.get_prest()),
 						pm.get_nbre_dj_ap_pm__str(),
 						pm.get_nbre_dj_progr_pm('AP'),
-						pm.get_nbre_dj_prep_real_pm(),
 						pm.get_nbre_dj_ap_rest_pm(),
 						pm.get_nbre_dj_pp_pm__str(),
 						pm.get_nbre_dj_progr_pm('PP'),
-						pm.get_nbre_dj_pp_rest_pm(),
+						pm.get_nbre_dj_prep_real_pm(True),
+						pm.get_nbre_dj_prep_real_pm(False),
+						pm.get_nbre_dj_pp_rest_pm(False),
+						pm.get_nbre_dj_pp_rest_pm(True),
 						'''
 						<span action="?action=initialiser-formset-transactions-demi-journees&id={}"
 						class="half-icon icon-without-text" modal-suffix="ger_tdj" onclick="ajax(event);"
@@ -347,24 +349,30 @@ def consult_marche(_req, _m) :
 					'table' : True,
 					'table_header' : [
 						[
-							['Nom', 'rowspan:3'],
-							['Nombre de demi-journées', 'colspan:7'],
-							['', 'rowspan:3'],
-							['', 'rowspan:3'],
-							['', 'rowspan:3']
+							['Nom', 'rowspan:4'],
+							['Nombre de demi-journées', 'colspan:9'],
+							['', 'rowspan:4'],
+							['', 'rowspan:4'],
+							['', 'rowspan:4']
 						],
 						[
-							['Animations ponctuelles', 'colspan:4'],
-							['Programmes pédagogiques', 'colspan:3']
+							['Animations ponctuelles', 'colspan:3'],
+							['Programmes pédagogiques', 'colspan:6']
+						],
+						[
+							['Prévues', 'rowspan:2'],
+							['Programmées', 'rowspan:2'],
+							['Restantes', 'rowspan:2'],
+							['Prévues', 'rowspan:2'],
+							['Programmées', 'rowspan:2'],
+							['De prép. et de réal.', 'colspan:2'],
+							['Restantes', 'colspan:2']
 						],
 						[
 							['Prévues', None],
-							['Programmées', None],
-							['De prép. et de réal.', None],
-							['Restantes', None],
-							['Prévues', None],
-							['Programmées', None],
-							['Restantes', None]
+							['Utilisées', None],
+							['Sans prép. et réal.', None],
+							['Avec prép. et réal.', None]
 						]
 					]
 				}

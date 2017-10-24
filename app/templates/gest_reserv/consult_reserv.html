@@ -23,9 +23,11 @@
 					{{ attrs_reserv.nom_complet_refer_reserv }}
 					{{ attrs_reserv.courr_refer_reserv }}
 					{{ attrs_reserv.tel_refer_reserv }}
+					{% if support %}
 					<div class="alt-well custom-well">Aides proposées par le SMMAR</div>
 					<span class="important">{{ aides_smmar }}</span>
 					{{ attrs_reserv.aides }}
+					{% endif %}
 					<div class="alt-well custom-well">Données complémentaires de la réservation</div>
 					{{ attrs_reserv.comm_reserv }}
 				</div>
@@ -50,8 +52,8 @@
 							{% for rr in r.get_rr.all %}
 							<tr>
 								<td>{{ rr.get_nom_complet }}</td>
-								<td>{{ rr.courr_rr }}</td>
-								<td>{{ rr.get_tel_rr__deconstructed }}</td>
+								<td>{{ rr.courr_rr|default:'-' }}</td>
+								<td>{{ rr.get_tel_rr__deconstructed|default:'-' }}</td>
 								<td>{{ rr.get_expos__count }}</td>
 								<td class="forbidden">
 									<span action="?action=initialiser-formulaire-modification-referent-reservation&id={{ rr.get_pk }}" class="icon-without-text modify-icon" modal-suffix="modif_rr" onclick="ajax(event);" title="Modifier le contact référent"></span>

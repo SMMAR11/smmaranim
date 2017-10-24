@@ -8,6 +8,7 @@ from app.views import gest_projets
 from app.views import gest_reserv
 from app.views import handlers
 from app.views import index
+from app.views import raccs
 from django.conf import settings
 from django.conf.urls import handler403
 from django.conf.urls import handler404
@@ -30,6 +31,7 @@ gest_marches__url = module__url + 'gestion-marches/'
 gest_projets__url = module__url + 'gestion-projets/'
 gest_anim__url = module__url + 'gestion-animations/'
 gest_reserv__url = module__url + 'gestion-reservations/'
+raccs__url = module__url + 'raccourcis/'
 
 urlpatterns += [
 	url(r'^{}$'.format(gest_marches__url), gest_marches.get_menu, name = 'gest_marches'),
@@ -117,6 +119,10 @@ urlpatterns += [
 		gest_reserv.consult_reserv,
 		name = 'consult_reserv'
 	)
+]
+
+urlpatterns += [
+	url(r'^{}$'.format(raccs__url), raccs.get_menu, name = 'raccs'),
 ]
 
 # Possibilité de consulter les pièces jointes

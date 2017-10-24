@@ -232,6 +232,7 @@ class GererReservation(forms.ModelForm) :
 		]
 		model = TReservation
 		widgets = {
+			'courr_refer_reserv' : forms.EmailInput(attrs = { 'may-be-required' : True }),
 			'doit_chercher' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
 			'doit_demonter' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
 			'doit_livrer' : forms.RadioSelect(choices = [(1, 'Oui'), (0, 'Non')]),
@@ -244,6 +245,7 @@ class GererReservation(forms.ModelForm) :
 			'ou_demonter' : forms.TextInput(attrs = { 'may-be-required' : True }),
 			'ou_livrer' : forms.TextInput(attrs = { 'may-be-required' : True }),
 			'ou_monter' : forms.TextInput(attrs = { 'may-be-required' : True }),
+			'tel_refer_reserv' : forms.TextInput(attrs = { 'may-be-required' : True })
 		}
 
 	def __init__(self, *args, **kwargs) :
@@ -454,6 +456,10 @@ class GererReferentReservation(forms.ModelForm) :
 
 		fields = ['courr_rr', 'nom_rr', 'prenom_rr', 'tel_rr']
 		model = TReferentReservation
+		widgets = {
+			'courr_rr' : forms.EmailInput(attrs = { 'may-be-required' : True }),
+			'tel_rr' : forms.TextInput(attrs = { 'may-be-required' : True })
+		}
 
 	def __init__(self, *args, **kwargs) :
 
@@ -543,7 +549,18 @@ class GererExposition(forms.ModelForm) :
 				initial['zl_borne_dt_expos'] = self.instance.get_borne_dt_expos()[0]
 			initial['zl_comm'] = self.instance.get_comm().get_pk()
 			initial['zl_rr'] = self.instance.get_rr().get_pk()
-			for cle, val in initial.items() : self.fields[cle].initial = val
+		else :
+			initial = { 'rb_dt_expos' : 0 if len(self.kw_reserv.get_dt_reserv()) > 1 else 1 }
+			if len(self.kw_reserv.get_dt_reserv()) > 1 :
+				initial['zd_dt_deb_expos'] = self.kw_reserv.get_dt_reserv()[0]
+				initial['zd_dt_fin_expos'] = self.kw_reserv.get_dt_reserv()[-1]
+				initial['zl_borne_dt_deb_expos'] = self.kw_reserv.get_borne_dt_reserv()[0]
+				initial['zl_borne_dt_fin_expos'] = self.kw_reserv.get_borne_dt_reserv()[-1]
+			else :
+				initial['zd_dt_expos'] = self.kw_reserv.get_dt_reserv()[0]
+				initial['zl_borne_dt_expos'] = self.kw_reserv.get_borne_dt_reserv()[0]
+
+		for cle, val in initial.items() : self.fields[cle].initial = val
 
 		# Gestion des champs date
 		if kw_dt_expos is not None :

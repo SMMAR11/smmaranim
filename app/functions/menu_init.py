@@ -37,8 +37,10 @@ def sub(_req, _mod, _lim) :
 		if _mod in menu.keys() :
 			for elem in menu[_mod]['mod_items'].values() :
 				thumbnails.append(thumbnail.format(
-					reverse(elem['item_url_name']) if elem['item_url_name'] else '#',
-					elem['item_img'],
+					'#' if not elem['item_url_name'] else \
+					elem['item_url_name'].replace('__ABS__', '') if elem['item_url_name'].startswith('__ABS__') else \
+					reverse(elem['item_url_name']),
+					elem['item_img'] or menu[_mod]['mod_img'],
 					elem['item_name']
 				))
 

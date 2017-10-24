@@ -38,6 +38,7 @@
 				<div class="col-sm-6">{{ form_ger_reserv.courr_refer_reserv }}</div>
 				<div class="col-sm-6">{{ form_ger_reserv.tel_refer_reserv }}</div>
 			</div>
+			{% if support %}
 			<div class="panel-fieldset row">Aides proposées par le SMMAR</div>
 			<span class="important">{{ aides_smmar }}</span>
 			{{ form_ger_reserv.doit_livrer }}
@@ -52,6 +53,7 @@
 			{{ form_ger_reserv.doit_demonter }}
 			{{ form_ger_reserv.quand_demonter }}
 			{{ form_ger_reserv.ou_demonter }}
+			{% endif %}
 			<div class="panel-fieldset row">Données complémentaires de la réservation</div>
 			{{ form_ger_reserv.comm_reserv }}
 			<button class="center-block custom-button main-button" type="submit">Valider</button>

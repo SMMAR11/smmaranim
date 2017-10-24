@@ -36,10 +36,6 @@ def ger_bilan(_req, _kwargs) :
 		content = '''
 		<div class="custom-well form-well">Données générales de l'animation</div>
 		{}
-		<div class="row">
-			<div class="col-md-6">{}</div>
-			<div class="col-md-6">{}</div>
-		</div>
 		{}
 		{}
 		{}
@@ -72,8 +68,6 @@ def ger_bilan(_req, _kwargs) :
 		'''.format(
 			form['titre_ba'],
 			form['nbre_pers_pres_ba'],
-			form['nbre_pers_prev_ba'],
-			form['theme_ba'],
 			form['themat_abord_ba'],
 			form['deroul_ba'],
 			form['en_inter'],

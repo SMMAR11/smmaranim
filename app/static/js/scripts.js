@@ -63,19 +63,23 @@ $(window).on('load', function() {
 			'consult_expos' : init_datatable(
 				'#dtable_consult_expos', { 'autofit' : [4, 5, 6], 'unbordered' : [4, 5, 6], 'unsorting' : [4, 5, 6] }
 			),
-			'consult_pm' : init_datatable('#dtable_consult_pm', { 'autofit' : [8], 'unsorting' : [8] }),
+			'consult_pm' : init_datatable(
+				'#dtable_consult_pm', { 'autofit' : [10], 'unsorting' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
+			),
 			'consult_projet' : init_datatable('#dtable_consult_projet', { 'autofit' : [5], 'unsorting' : [5] }),
 			'consult_ta' : init_datatable('#dtable_consult_ta'),
-			'consult_tdj' : init_datatable('#dtable_consult_tdj', { 'unsorting' : [2] }),
+			'consult_tdj' : init_datatable('#dtable_consult_tdj', { 'unsorting' : [2, 3] }),
 			'ger_cep' : init_datatable('#dtable_ger_cep', { 'autofit' : [2], 'unsorting' : '_all' }),
 			'ger_point' : init_datatable('#dtable_ger_point', { 'autofit' : [3], 'unsorting' : '_all' }),
 			'ger_ta' : init_datatable('#dtable_ger_ta', { 'autofit' : [3], 'unsorting' : '_all' }),
-			'ger_tdj' : init_datatable('#dtable_ger_tdj', { 'autofit' : [2], 'unsorting' : '_all' }),
+			'ger_tdj' : init_datatable('#dtable_ger_tdj', { 'autofit' : [3], 'unsorting' : '_all' }),
 			'plaq' : init_datatable('#dtable_plaq', { 'autofit' : [0], 'unsorting' : [0] }),
 			'point' : init_datatable('#dtable_point'),
-			'prest' : init_datatable(
-				'#dtable_prest', { 'autofit' : [2, 3, 4], 'unbordered' : [8, 9, 10], 'unsorting' : [8, 9, 10] }
-			),
+			'prest' : init_datatable('#dtable_prest', {
+				'autofit' : [2, 3, 4],
+				'unbordered' : [10, 11, 12],
+				'unsorting' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' })
 		};

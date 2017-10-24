@@ -46,6 +46,7 @@ def ger_reserv(_req, _inst) :
 	from django.shortcuts import get_object_or_404
 	from django.shortcuts import render
 	from smmaranim.custom_settings import ALERTS
+	from smmaranim.custom_settings import SMMAR_SUPPORT
 	import json
 
 	output = None
@@ -79,6 +80,7 @@ def ger_reserv(_req, _inst) :
 			'form_ger_reserv' : form_init(form_ger_reserv),
 			'modals' : [modal_init('ger_reserv', title)],
 			'r' : obj_reserv,
+			'support' : SMMAR_SUPPORT,
 			'title' : title
 		})
 
@@ -89,10 +91,10 @@ def ger_reserv(_req, _inst) :
 			_req.POST,
 			instance = obj_reserv,
 			kw_dt_reserv = int(_req.POST.get('rb_dt_reserv')),
-			kw_doit_chercher = int(_req.POST.get('doit_chercher')),
-			kw_doit_demonter = int(_req.POST.get('doit_demonter')),
-			kw_doit_livrer = int(_req.POST.get('doit_livrer')),
-			kw_doit_monter = int(_req.POST.get('doit_monter')),
+			kw_doit_chercher = 0 if not _req.POST.get('doit_chercher') else int(_req.POST.get('doit_chercher')),
+			kw_doit_demonter = 0 if not _req.POST.get('doit_demonter') else int(_req.POST.get('doit_demonter')),
+			kw_doit_livrer = 0 if not _req.POST.get('doit_livrer') else int(_req.POST.get('doit_livrer')),
+			kw_doit_monter = 0 if not _req.POST.get('doit_monter') else int(_req.POST.get('doit_monter')),
 			kw_util = obj_util_connect
 		)
 
@@ -231,6 +233,7 @@ def consult_reserv(_req, _r) :
 	from django.shortcuts import get_object_or_404
 	from django.shortcuts import render
 	from smmaranim.custom_settings import ALERTS
+	from smmaranim.custom_settings import SMMAR_SUPPORT
 	import json
 
 	output = None
@@ -461,6 +464,7 @@ def consult_reserv(_req, _r) :
 				output = render(_req, './gest_reserv/imprim_reserv.html', {
 					'aides_smmar' : ALERTS['aides_smmar'],
 					'attrs_reserv' : obj_reserv.get_attrs_reserv(True),
+					'support' : SMMAR_SUPPORT,
 					'title' : 'Imprimer une réservation'
 				})
 
@@ -489,6 +493,7 @@ def consult_reserv(_req, _r) :
 				'can_access' : obj_util_connect.can_access(obj_reserv.get_util().get_org()),
 				'modals' : modals,
 				'r' : obj_reserv,
+				'support' : SMMAR_SUPPORT,
 				'title' : 'Consulter une réservation'
 			})
 

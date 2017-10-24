@@ -13,13 +13,31 @@ admin.site.disable_action('delete_selected')
 
 class Organisme(admin.ModelAdmin) :
 
+	# Mise en forme de la dernière colonne du tableau
+	def get_coul_org(self, _obj) :
+
+		# Initialisation des styles
+		styles = {
+			'background-color' : _obj.get_coul_org() if _obj.get_coul_org() != 'revert' else '#555' ,
+			'border-radius' : '100%',
+			'display' : 'inline-block',
+			'height' : '15px',
+			'vertical-align' : 'middle',
+			'width' : '15px'
+		}
+
+		return '<span style="{}"></span>'.format(' '.join(['{}: {};'.format(cle, val) for cle, val in styles.items()]))
+		
+	get_coul_org.allow_tags = True
+	get_coul_org.short_description = 'Couleur HTML'
+
 	def get_readonly_fields(self, _req, _obj = None) :
 		if _obj : return self.readonly_fields + ('est_prest',)
 		return self.readonly_fields
 
 	actions = [admin.actions.delete_selected]
 	fields = ['nom_org', 'est_prest', 'coul_org']
-	list_display = ['nom_org']
+	list_display = ['nom_org', 'get_coul_org']
 
 admin.site.register(TOrganisme, Organisme)
 
@@ -109,7 +127,10 @@ admin.site.register(TTypePublic, TypePublic)
 
 class Ecole(admin.ModelAdmin) :
 	actions = [admin.actions.delete_selected]
-	fields = list_display = ['nom_ecole', 'code_comm']
+	form = FEcole
+	fields = ['zl_type_ecole', 'zs_nom_ecole', 'code_comm']
+	list_display = ['nom_ecole', 'code_comm']
+
 
 admin.site.register(TEcole, Ecole)
 

@@ -187,11 +187,13 @@ def consult_compte(_req) :
 					pm.get_marche(),
 					pm.get_nbre_dj_ap_pm__str(),
 					pm.get_nbre_dj_progr_pm('AP'),
-					pm.get_nbre_dj_prep_real_pm(),
 					pm.get_nbre_dj_ap_rest_pm(),
 					pm.get_nbre_dj_pp_pm__str(),
 					pm.get_nbre_dj_progr_pm('PP'),
-					pm.get_nbre_dj_pp_rest_pm(),
+					pm.get_nbre_dj_prep_real_pm(True),
+					pm.get_nbre_dj_prep_real_pm(False),
+					pm.get_nbre_dj_pp_rest_pm(False),
+					pm.get_nbre_dj_pp_rest_pm(True),
 					'''
 					<span action="?action=initialiser-formset-transactions-demi-journees&id={}"
 					class="half-icon icon-without-text" modal-suffix="ger_tdj" onclick="ajax(event);"

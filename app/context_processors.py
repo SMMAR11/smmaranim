@@ -8,6 +8,7 @@ def set_alerts(_req) :
 	from datetime import date
 	from django.core.urlresolvers import reverse
 	from smmaranim.custom_settings import PKS
+	from smmaranim.custom_settings import SMMAR_SUPPORT
 
 	alertes = []
 
@@ -49,30 +50,34 @@ def set_alerts(_req) :
 				})
 
 			# Renvoi d'une alerte en cas de dépassement du marché en programmes pédagogiques
-			if pm.get_nbre_dj_pp_rest_pm(False) < 0 :
+			for elem in [pm.get_nbre_dj_pp_rest_pm(False, False), pm.get_nbre_dj_pp_rest_pm(True, False)] :
+				if elem < 0 :
 
-				# Calcul du taux de dépassement
-				taux = (abs(pm.get_nbre_dj_pp_rest_pm(False)) / pm.get_nbre_dj_pp_pm()) * 100
+					# Calcul du taux de dépassement
+					taux = (abs(elem) / pm.get_nbre_dj_pp_pm()) * 100
 
-				# Stockage du niveau d'alerte
-				if taux > 20 :
-					niveau = 3
-				elif taux > 10 :
-					niveau = 2
-				else :
-					niveau = 1
+					# Stockage du niveau d'alerte
+					if taux > 20 :
+						niveau = 3
+					elif taux > 10 :
+						niveau = 2
+					else :
+						niveau = 1
 
-				alertes.append({
-					'descr_alert' : '''
-					Le nombre de demi-journées prévues en programmes pédagogiques a été dépassé de {} % pour le marché
-					suivant : {}.
-					'''.format('{0:g}'.format(taux), pm.get_marche()),
-					'lien_alert' : '#',
-					'nat_alert' : 'Dépassement du marché en programmes pédagogiques',
-					'niveau_alert' : [niveau, niveaux[niveau]]
-				})
+					alertes.append({
+						'descr_alert' : '''
+						Le nombre de demi-journées prévues en programmes pédagogiques a été dépassé de {} % pour le
+						marché suivant : {}.
+						'''.format('{0:g}'.format(taux), pm.get_marche()),
+						'lien_alert' : '#',
+						'nat_alert' : 'Dépassement du marché en programmes pédagogiques',
+						'niveau_alert' : [niveau, niveaux[niveau]]
+					})
 
-		if obj_util_connect.get_org().get_pk() == PKS['id_org__smmar'] :
+					# Sortie de la boucle si une alerte est déjà générée pour ce marché
+					break
+
+		if obj_util_connect.get_org().get_pk() == PKS['id_org__smmar'] and SMMAR_SUPPORT == True :
 
 			# Stockage de la date du jour
 			today = date.today() 
@@ -200,6 +205,7 @@ def set_menus(_req) :
 
 		# Mise en forme de l'élément
 		if len(elem['mod_items']) > 0 :
+
 			li = '''
 			<li class="dropdown">
 				<a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -211,7 +217,11 @@ def set_menus(_req) :
 			'''.format(
 				elem['mod_name'],
 				''.join(['<li><a href="{}">{}</a></li>'.format(
-					reverse(elem_2['item_url_name']) if elem_2['item_url_name'] else '#', elem_2['item_name']
+					'#' if not elem_2['item_url_name'] else \
+					elem_2['item_url_name'].replace('__ABS__', '') if \
+					elem_2['item_url_name'].startswith('__ABS__') else \
+					reverse(elem_2['item_url_name']),
+					elem_2['item_name']
 				) for elem_2 in elem['mod_items'].values()])
 			)
 		else :
@@ -258,7 +268,10 @@ def set_menus(_req) :
 			# Fin de paramétrage du panel
 			params['mod_key'] = cle
 			params['mod_items'] = ''.join(['<tr><td><a href="{}">{}</a></td></tr>'.format(
-				reverse(elem['item_url_name']) if elem['item_url_name'] else '#', elem['item_name']
+				'#' if not elem['item_url_name'] else \
+				elem['item_url_name'].replace('__ABS__', '') if elem['item_url_name'].startswith('__ABS__') else \
+				reverse(elem['item_url_name']),
+				elem['item_name']
 			) for elem in val['mod_items'].values()])
 
 		else :

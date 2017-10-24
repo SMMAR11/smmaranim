@@ -32,6 +32,10 @@ class GererProjet(forms.ModelForm) :
 			'tel_refer_projet'
 		]
 		model = TProjet
+		widgets = {
+			'courr_refer_projet' : forms.EmailInput(attrs = { 'may-be-required' : True }),
+			'tel_refer_projet' : forms.TextInput(attrs = { 'may-be-required' : True })
+		}
 
 	def __init__(self, *args, **kwargs) :
 

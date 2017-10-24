@@ -135,7 +135,7 @@ class Command(BaseCommand) :
 			path = '{}/{}'.format(CSV_ROOT, fichier)
 
 			# Ouverture du fichier CSV en lecture
-			fichier_csv = open(path, 'r')
+			fichier_csv = open(path, 'r', encoding = 'cp1252')
 			reader = csv.reader(fichier_csv, delimiter = ';')
 
 			# Rédaction de la requête SQL

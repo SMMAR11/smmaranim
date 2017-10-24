@@ -228,7 +228,8 @@ class ChoisirPrestataireMarche(forms.Form) :
 				trs += [[
 					tdj.get_pm().get_prest(),
 					tdj.get_int_tdj(),
-					tdj.get_nbre_dj_tdj__str()
+					tdj.get_nbre_dj_tdj_progr__str(),
+					tdj.get_nbre_dj_tdj_util__str()
 				] for tdj in obj_pm.get_tdj().all()]
 
 			# Mise en forme de la datatable
@@ -237,9 +238,13 @@ class ChoisirPrestataireMarche(forms.Form) :
 				<table border="1" bordercolor="#DDD">
 					<thead>
 						<tr>
-							<th>Prestataire</th>
-							<th>Intitulé</th>
-							<th>Nombre de demi-journées de préparation et de réalisation</th>
+							<th rowspan="2">Prestataire</th>
+							<th rowspan="2">Intitulé</th>
+							<th colspan="2">Nombre de demi-journées de préparation et de réalisation</th>
+						</tr>
+						<tr>
+							<th>Programmées</th>
+							<th>Utilisées</th>
 						</tr>
 					</thead>
 					<tbody>{}</tbody>
@@ -292,7 +297,7 @@ class GererTransactionDemiJournees(forms.ModelForm) :
 		# Import
 		from app.models import TTransactionDemiJournees
 
-		fields = ['int_tdj', 'nbre_dj_tdj']
+		fields = ['int_tdj', 'nbre_dj_tdj_progr', 'nbre_dj_tdj_util']
 		model = TTransactionDemiJournees
 
 	def __init__(self, *args, **kwargs) :
@@ -303,6 +308,25 @@ class GererTransactionDemiJournees(forms.ModelForm) :
 
 		super(GererTransactionDemiJournees, self).__init__(*args, **kwargs)
 		self.empty_permitted = False
+
+	def clean(self) :
+
+		# Stockage des données du formulaire
+		cleaned_data = super(GererTransactionDemiJournees, self).clean()
+		val_int_tdj = cleaned_data.get('int_tdj')
+		val_nbre_dj_tdj_progr = cleaned_data.get('nbre_dj_tdj_progr')
+		val_nbre_dj_tdj_util = cleaned_data.get('nbre_dj_tdj_util')
+
+		# Renvoi d'une erreur si utilisation > programmation
+		if val_int_tdj and val_nbre_dj_tdj_progr is not None and val_nbre_dj_tdj_util is not None :
+			if val_nbre_dj_tdj_util > val_nbre_dj_tdj_progr :
+				self.add_error(
+					'__all__',
+					'''
+					Veuillez saisir un nombre de demi-journées utilisées inférieur au nombre de demi-journées
+					prévues pour la ligne dont l'intitulé est « {} ».
+					'''.format(val_int_tdj)
+				)
 
 	def save(self, commit = True) :
 
@@ -323,12 +347,17 @@ class GererTransactionDemiJournees(forms.ModelForm) :
 		# Définition des valeurs initiales de chaque formulaire du formset si besoin
 		initial = [{
 			'int_tdj' : tdj.get_int_tdj(),
-			'nbre_dj_tdj' : tdj.get_nbre_dj_tdj__str(),
+			'nbre_dj_tdj_progr' : tdj.get_nbre_dj_tdj_progr__str(),
+			'nbre_dj_tdj_util' : tdj.get_nbre_dj_tdj_util__str()
 		} for tdj in self.kw_pm.get_tdj().all()] if self.kw_pm else None
 
 		# Initialisation du formset
 		formset = formset_init(
-			'ger_tdj', GererTransactionDemiJournees, ['', False], 'int_tdj|nbre_dj_tdj', { 'initial' : initial }
+			'ger_tdj',
+			GererTransactionDemiJournees,
+			['', False],
+			'int_tdj|nbre_dj_tdj_progr|nbre_dj_tdj_util',
+			{ 'initial' : initial }
 		)
 
 		if self.kw_init == False :

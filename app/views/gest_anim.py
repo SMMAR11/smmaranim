@@ -87,7 +87,6 @@ def ger_anim(_req, _inst) :
 		form_ger_anim = GererAnimation(
 			_req.POST,
 			instance = obj_anim,
-			kw_est_anim = int(_req.POST.get('est_anim')),
 			kw_org = obj_util_connect.get_org()
 		)
 
@@ -464,14 +463,6 @@ def consult_anim(_req, _a) :
 						}, {
 							'field_id' : '#id_nbre_pers_pres_ba',
 							'field_value' : obj_ba_clone.get_nbre_pers_pres_ba(),
-							'type' : 'text' 
-						}, {
-							'field_id' : '#id_nbre_pers_prev_ba',
-							'field_value' : obj_ba_clone.get_nbre_pers_prev_ba(),
-							'type' : 'text' 
-						}, {
-							'field_id' : '#id_theme_ba',
-							'field_value' : obj_ba_clone.get_theme_ba(),
 							'type' : 'text' 
 						}, {
 							'field_id' : '#id_themat_abord_ba',

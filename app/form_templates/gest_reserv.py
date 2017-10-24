@@ -18,7 +18,12 @@ def ger_expos(_req, _kwargs) :
 	_form = form_init(form)
 
 	# Définition d'un paramètre d'affichage des champs date
-	tranche = 0 if 'instance' in _kwargs and not len(_kwargs['instance'].get_dt_expos()) > 1 else 1
+	if 'instance' in _kwargs and not len(_kwargs['instance'].get_dt_expos()) > 1 :
+		tranche = 0
+	elif 'kw_reserv' in _kwargs and not len(_kwargs['kw_reserv'].get_dt_reserv()) > 1 :
+		tranche = 0
+	else :
+		tranche = 1
 
 	return '''
 	<form action="?action={}-exposition" method="post" name="form_{}_expos" onsubmit="ajax(event);">

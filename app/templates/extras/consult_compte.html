@@ -3,39 +3,48 @@
 <div class="custom-well main-well">{{ title }}</div>
 <div class="row">
 	<div class="col-sm-9">
+{% if u.get_org.get_est_prest == True %}
 		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
 			<li class="active"><a href="#ongl_compte" data-toggle="tab">Mon compte</a></li>
 			<li><a href="#ongl_pm" data-toggle="tab">Marchés</a></li>
 		</ul>
 		<div class="tab-content">
 			<div id="ongl_compte" class="active fade in tab-pane">
+{% endif %}
 				<div class="attributes-wrapper">
 					{{ attrs_util.nom_complet }}
 					{{ attrs_util.email }}
 					{{ attrs_util.org }}
 				</div>
+{% if u.get_org.get_est_prest == True %}
 			</div>
 			<div id="ongl_pm" class="fade tab-pane">
 				<div class="custom-table" id="dtable_consult_pm">
 					<table border="1" bordercolor="#DDD">
 						<thead>
 							<tr>
-								<th rowspan="3">Marché</th>
-								<th colspan="7">Nombre de demi-journées</th>
-								<th rowspan="3"></th>
+								<th rowspan="4">Marché</th>
+								<th colspan="9">Nombre de demi-journées</th>
+								<th rowspan="4"></th>
 							</tr>
 							<tr>
-								<th colspan="4">Animations ponctuelles</th>
-								<th colspan="3">Programmes pédagogiques</th>
+								<th colspan="3">Animations ponctuelles</th>
+								<th colspan="6">Programmes pédagogiques</th>
+							</tr>
+							<tr>
+								<th rowspan="2">Prévues</th>
+								<th rowspan="2">Programmées</th>
+								<th rowspan="2">Restantes</th>
+								<th rowspan="2">Prévues</th>
+								<th rowspan="2">Programmées</th>
+								<th colspan="2">De prép. et de réal.</th>
+								<th colspan="2">Restantes</th>
 							</tr>
 							<tr>
 								<th>Prévues</th>
-								<th>Programmées</th>
-								<th>De prép. et de réal.</th>
-								<th>Restantes</th>
-								<th>Prévues</th>
-								<th>Programmées</th>
-								<th>Restantes</th>
+								<th>Utilisées</th>
+								<th>Sans prép. et réal.</th>
+								<th>Avec prép. et réal.</th>
 							</tr>
 						</thead>
 						<tbody>{{ tbody | safe }}</tbody>
@@ -43,6 +52,7 @@
 				</div>
 			</div>
 		</div>
+{% endif %}
 	</div>
 	<div class="br-sm col-sm-3">
 		<span class="icon-with-text modify-icon" data-target="#fm_modif_compte" data-toggle="modal">Modifier mon compte</span>
