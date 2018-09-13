@@ -212,11 +212,13 @@ class TPrestatairesMarche(models.Model) :
 	id_marche = models.ForeignKey(TMarche, on_delete = models.CASCADE)
 	id_prest = models.ForeignKey(TOrganisme, on_delete = models.CASCADE)
 	nbre_dj_ap_pm = models.FloatField(
-		validators = [MinValueValidator(0.5), valid_dj],
+		default = 0,
+		validators = [MinValueValidator(0), valid_dj],
 		verbose_name = 'Nombre de demi-journées pour les animations ponctuelles'
 	)
 	nbre_dj_pp_pm = models.FloatField(
-		validators = [MinValueValidator(0.5), valid_dj],
+		default = 0,
+		validators = [MinValueValidator(0), valid_dj],
 		verbose_name = 'Nombre de demi-journées pour les programmes pédagogiques'
 	)
 
@@ -274,7 +276,7 @@ class TTransactionDemiJournees(models.Model) :
 	id_tdj = models.AutoField(primary_key = True)
 	int_tdj = models.CharField(max_length = 255, verbose_name = 'Intitulé')
 	nbre_dj_tdj_progr = models.FloatField(
-		validators = [MinValueValidator(0.5), valid_dj], verbose_name = 'Nombre de demi-journées prévues'
+		default = 0, validators = [MinValueValidator(0), valid_dj], verbose_name = 'Nombre de demi-journées prévues'
 	)
 	nbre_dj_tdj_util = models.FloatField(
 		default = 0, validators = [MinValueValidator(0), valid_dj], verbose_name = 'Nombre de demi-journées utilisées'
