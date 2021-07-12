@@ -744,7 +744,7 @@ class TBilan(models.Model) :
 			'org' : { 'label' : 'Organisme', 'value' : self.get_util().get_org() },
 			'refer_bilan' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
 			'struct_refer_bilan' : {
-				'label' : 'Structure du contact référent', 'value' : self.get_fonct_refer_bilan()
+				'label' : 'Structure du contact référent', 'value' : self.get_struct_refer_bilan()
 			},
 			'util' : {
 				'label' : 'Utilisateur ayant effectué la dernière modification',
