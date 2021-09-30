@@ -14,8 +14,13 @@ class GererMarche(forms.ModelForm) :
 		# Import
 		from app.models import TMarche
 
-		fields = ['int_marche']
+		fields = ['int_marche', 'diffe_ani_ponc_pro_peda_marche']
 		model = TMarche
+		widgets = {
+			'diffe_ani_ponc_pro_peda_marche': forms.RadioSelect(
+				choices = [(True, 'Oui'), (False, 'Non')]
+			)
+		}
 
 	def __init__(self, *args, **kwargs) :
 		super(GererMarche, self).__init__(*args, **kwargs)
@@ -148,7 +153,7 @@ class GererPrestataireMarche(forms.ModelForm) :
 		# Import
 		from app.models import TPrestatairesMarche
 
-		fields = ['nbre_dj_ap_pm', 'nbre_dj_pp_pm']
+		fields = ['nbre_dj_ap_pm', 'nbre_dj_pp_pm', 'nbre_dj_ani_pm']
 		model = TPrestatairesMarche
 
 	def __init__(self, *args, **kwargs) :
@@ -175,6 +180,14 @@ class GererPrestataireMarche(forms.ModelForm) :
 		# Personnalisation du champ prestataire
 		if self.instance.get_pk() :
 			self.fields['zl_prest'].empty_label = None; self.fields['zl_prest'].initial = self.instance.get_prest()
+
+		# Gestion d'affichage des champs "Nombre de demi-journées"
+		# selon le type de marché
+		if self.kw_marche.diffe_ani_ponc_pro_peda_marche:
+			del self.fields['nbre_dj_ani_pm']
+		else:
+			del self.fields['nbre_dj_ap_pm']
+			del self.fields['nbre_dj_pp_pm']
 
 	def save(self, commit = True) :
 

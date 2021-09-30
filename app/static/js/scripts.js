@@ -80,6 +80,11 @@ $(window).on('load', function() {
 				'unbordered' : [10, 11, 12],
 				'unsorting' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 			}),
+			'prest2' : init_datatable('#dtable_prest2', {
+				'autofit' : [2, 3],
+				'unbordered' : [2, 3],
+				'unsorting' : [1, 2, 3]
+			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' })
 		};

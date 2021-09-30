@@ -43,7 +43,7 @@ def ger_bilan(_req, _kwargs) :
 			<div class="col-md-6">{}</div>
 			<div class="col-md-6">{}</div>
 		</div>
-		<div class="custom-well form-well">Contact référent de l'animation</div>
+		<div class="custom-well form-well">Animateur référent</div>
 		<div class="row">
 			<div class="col-md-6">{}</div>
 			<div class="col-md-6">{}</div>

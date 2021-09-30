@@ -94,7 +94,11 @@ class FiltrerProjet(forms.Form) :
 	from app.models import TTypeIntervention
 
 	# Champs
-	zl_org = forms.ModelChoiceField(label = 'Organisme', queryset = TOrganisme.objects.all(), required = False)
+	zl_org = forms.ModelChoiceField(
+		label = 'Organisme bénéficiant du projet',
+		queryset = TOrganisme.objects.all(),
+		required = False
+	)
 	zl_type_interv = forms.ModelChoiceField(
 		label = 'Type d\'intervention', queryset = TTypeIntervention.objects.all(), required = False
 	)

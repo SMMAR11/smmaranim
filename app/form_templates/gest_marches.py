@@ -24,6 +24,7 @@ def ger_pm(_req, _kwargs) :
 			<div class="col-md-6">{}</div>
 			<div class="col-md-6">{}</div>
 		</div>
+		{}
 		<button class="center-block custom-button main-button" type="submit">Valider</button>
 	</form>
 	'''.format(
@@ -31,6 +32,7 @@ def ger_pm(_req, _kwargs) :
 		'modif' if 'instance' in _kwargs else 'ajout',
 		csrf(_req)['csrf_token'],
 		form['zl_prest'],
-		form['nbre_dj_ap_pm'],
-		form['nbre_dj_pp_pm']
+		form.get('nbre_dj_ap_pm') or '',
+		form.get('nbre_dj_pp_pm') or '',
+		form.get('nbre_dj_ani_pm') or ''
 	)

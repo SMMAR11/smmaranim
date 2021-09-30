@@ -177,6 +177,10 @@ class TMarche(models.Model) :
 	id_marche = models.AutoField(primary_key = True)
 	dt_marche = ArrayField(base_field = models.DateField(), size = 2)
 	int_marche = models.CharField(max_length = 255, verbose_name = 'Intitulé du marché')
+	diffe_ani_ponc_pro_peda_marche = models.BooleanField(
+		default=True,
+		verbose_name='Différencier les animations ponctuelles et les programmes pédagogiques ?'
+	)
 
 	# Relation
 	prest = models.ManyToManyField(TOrganisme, through = 'TPrestatairesMarche')
@@ -221,6 +225,11 @@ class TPrestatairesMarche(models.Model) :
 		validators = [MinValueValidator(0), valid_dj],
 		verbose_name = 'Nombre de demi-journées pour les programmes pédagogiques'
 	)
+	nbre_dj_ani_pm = models.FloatField(
+		default=0,
+		validators=[MinValueValidator(0), valid_dj],
+		verbose_name='Nombre de demi-journées pour les animations'
+	)
 
 	class Meta :
 		db_table = 't_prestataires_marche'
@@ -240,6 +249,7 @@ class TPrestatairesMarche(models.Model) :
 	# Méthodes
 	def get_nbre_dj_ap_pm__str(self) : return '{0:g}'.format(self.get_nbre_dj_ap_pm())
 	def get_nbre_dj_pp_pm__str(self) : return '{0:g}'.format(self.get_nbre_dj_pp_pm())
+	def get_nbre_dj_ani_pm__str(self) : return '{0:g}'.format(self.nbre_dj_ani_pm)
 	def get_nbre_dj_progr_pm(self, _ti, _str = True) :
 		vals = []
 		for p in self.get_projet().all() :
@@ -443,18 +453,28 @@ class TProjet(models.Model) :
 	# Attributs
 	id_projet = models.AutoField(primary_key = True)
 	comm_projet = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
-	courr_refer_projet = models.EmailField(blank = True, null = True, verbose_name = 'Courriel du contact référent')
+	courr_refer_projet = models.EmailField(
+		blank = True,
+		null = True,
+		verbose_name = 'Courriel du contact référent de l\'organisme bénéficiant du projet'
+	)
 	int_projet = models.CharField(max_length = 255, verbose_name = 'Intitulé du projet')
-	nom_refer_projet = models.CharField(max_length = 255, verbose_name = 'Nom de famille du contact référent')
+	nom_refer_projet = models.CharField(
+		max_length = 255,
+		verbose_name = 'Nom de famille du contact référent de l\'organisme bénéficiant du projet'
+	)
 	prenom_refer_projet = models.CharField(
-		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent'
+		blank = True,
+		max_length = 255,
+		null = True,
+		verbose_name = 'Prénom du contact référent de l\'organisme bénéficiant du projet'
 	)
 	tel_refer_projet = models.CharField(
 		blank = True,
 		max_length = 10,
 		null = True,
 		validators = [RegexValidator(r'^[0-9]{10}')],
-		verbose_name = 'Numéro de téléphone du contact référent'
+		verbose_name = 'Numéro de téléphone du contact référent de l\'organisme bénéficiant du projet'
 	)
 	id_org = models.ForeignKey(TOrganisme, on_delete = models.CASCADE)
 	id_pm = models.ForeignKey(TPrestatairesMarche, null = True, on_delete = models.CASCADE)
@@ -518,7 +538,7 @@ class TProjet(models.Model) :
 				] for a in self.get_anim().all()],
 				'table' : True,
 				'table_header' : [[
-					['Organisme', None],
+					['Organisme en charge de l\'animation', None],
 					['Date et heure de l\'animation', None],
 					['Nature de l\'animation', None],
 					['Lieu de l\'animation', None],
@@ -528,15 +548,22 @@ class TProjet(models.Model) :
 			},
 			'comm_projet' : { 'label' : 'Commentaire', 'value' : self.get_comm_projet() },
 			'courr_refer_projet' : { 
-				'label' : 'Courriel du contact référent', 'value' : self.get_courr_refer_projet()
+				'label' : 'Courriel du contact référent de l\'organisme bénéficiant du projet',
+				'value' : self.get_courr_refer_projet()
 			},
 			'int_projet' : { 'label' : 'Intitulé du projet', 'value' : self.get_int_projet() },
 			'marche' : { 'label' : 'Marché', 'value' : self.get_pm().get_marche() if self.get_pm() else None },
-			'org' : { 'label' : 'Organisme', 'value' : self.get_org() },
-			'refer_projet' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
+			'org' : {
+				'label' : 'Organisme bénéficiant du projet',
+				'value' : self.get_org()
+			},
+			'refer_projet' : {
+				'label' : 'Nom complet du contact référent de l\'organisme bénéficiant du projet',
+				'value' : self.get_nom_complet()
+			},
 			'sti' : { 'label' : 'Événement', 'value' : self.get_sti() },
 			'tel_refer_projet' : {
-				'label' : 'Numéro de téléphone du contact référent',
+				'label' : 'Numéro de téléphone du contact référent de l\'organisme bénéficiant du projet',
 				'value' : self.get_tel_refer_projet__deconstructed()
 			},
 			'type_interv' : { 'label' : 'Type d\'intervention', 'value' : self.get_type_interv() },
@@ -663,7 +690,10 @@ class TAnimation(models.Model) :
 			'dt_heure_anim' : { 'label' : 'Date et heure de l\'animation', 'value' : self.get_dt_heure_anim__str() },
 			'lieu_anim' : { 'label' : 'Lieu de l\'animation', 'value' : self.get_lieu_anim() },
 			'nat_anim' : { 'label' : 'Nature de l\'animation', 'value' : self.get_nat_anim() },
-			'prest' : { 'label' : 'Organisme', 'value' : self.get_projet().get_org() },
+			'prest' : {
+				'label' : 'Organisme en charge de l\'animation',
+				'value' : self.get_projet().get_org()
+			},
 			'struct' : { 'label' : 'Structure d\'accueil', 'value' : self.get_struct() },
 			'projet' : { 'label' : 'Projet', 'value' : self.get_projet() }
 		}
@@ -700,16 +730,28 @@ class TBilan(models.Model) :
 	id_bilan = models.AutoField(primary_key = True)
 	comm_bilan = models.TextField(blank = True, null = True, verbose_name = 'Commentaire')
 	fonct_refer_bilan = models.CharField(
-		blank = True, max_length = 255, null = True, verbose_name = 'Fonction du contact référent de l\'animation'
+		blank = True,
+		max_length = 255,
+		null = True,
+		verbose_name = 'Fonction de l\'animateur référent'
 	)
 	nom_refer_bilan = models.CharField(
-		blank = True, max_length = 255, null = True, verbose_name = 'Nom de famille du contact référent de l\'animation'
+		blank = True,
+		max_length = 255,
+		null = True,
+		verbose_name = 'Nom de famille de l\'animateur référent'
 	)
 	prenom_refer_bilan = models.CharField(
-		blank = True, max_length = 255, null = True, verbose_name = 'Prénom du contact référent de l\'animation'
+		blank = True,
+		max_length = 255,
+		null = True,
+		verbose_name = 'Prénom de l\'animateur référent'
 	)
 	struct_refer_bilan = models.CharField(
-		blank = True, max_length = 255, null = True, verbose_name = 'Structure du contact référent de l\'animation'
+		blank = True,
+		max_length = 255,
+		null = True,
+		verbose_name = 'Structure de l\'animateur référent'
 	)
 	id_anim = models.ForeignKey(TAnimation, on_delete = models.CASCADE)
 	id_util = models.ForeignKey(TUtilisateur, on_delete = models.CASCADE)
@@ -740,11 +782,18 @@ class TBilan(models.Model) :
 		attrs_bilan = {
 			'anim' : { 'label' : 'Animation', 'value' : self.get_anim() },
 			'comm_bilan' : { 'label' : 'Commentaire', 'value' : self.get_comm_bilan() },
-			'fonct_refer_bilan' : { 'label' : 'Fonction du contact référent', 'value' : self.get_fonct_refer_bilan() },
+			'fonct_refer_bilan' : {
+				'label' : 'Fonction de l\'animateur référent',
+				'value' : self.get_fonct_refer_bilan()
+			},
 			'org' : { 'label' : 'Organisme', 'value' : self.get_util().get_org() },
-			'refer_bilan' : { 'label' : 'Nom complet du contact référent', 'value' : self.get_nom_complet() },
+			'refer_bilan' : {
+				'label' : 'Nom complet de l\'animateur référent',
+				'value' : self.get_nom_complet()
+			},
 			'struct_refer_bilan' : {
-				'label' : 'Structure du contact référent', 'value' : self.get_struct_refer_bilan()
+				'label' : 'Structure de l\'animateur référent',
+				'value' : self.get_struct_refer_bilan()
 			},
 			'util' : {
 				'label' : 'Utilisateur ayant effectué la dernière modification',

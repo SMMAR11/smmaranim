@@ -310,14 +310,8 @@ def consult_marche(_req, _m) :
 				
 		else :
 
-			# Initialisation des attributs du marché
-			attrs_marche = {
-				'dt_deb_marche' : {
-					'label' : 'Date de début du marché', 'value' : obj_marche.get_dt_marche__str()[0]
-				},
-				'dt_fin_marche' : { 'label' : 'Date de fin du marché', 'value' : obj_marche.get_dt_marche__str()[1] },
-				'int_marche' : { 'label' : 'Intitulé du marché', 'value' : obj_marche.get_int_marche() },
-				'prest' : {
+			if obj_marche.diffe_ani_ponc_pro_peda_marche:
+				prest = {
 					'label' : 'Prestataire(s) lié(s) au marché',
 					'value' : [[
 						str(pm.get_prest()),
@@ -376,6 +370,45 @@ def consult_marche(_req, _m) :
 						]
 					]
 				}
+				prest2 = {}
+			else:
+				prest = {}
+				prest2 = {
+					'label' : 'Prestataire(s) lié(s) au marché',
+					'value' : [[
+						str(pm.get_prest()),
+						pm.get_nbre_dj_ani_pm__str(),
+						'''
+						<span action="?action=initialiser-formulaire-modification-prestataire&id={}"
+						class="icon-without-text modify-icon" modal-suffix="modif_pm" onclick="ajax(event);"
+						title="Modifier le prestataire"></span>
+						'''.format(pm.get_pk()),
+						'''
+						<span action="?action=retirer-prestataire-etape-1&id={}"
+						class="delete-icon icon-without-text" modal-suffix="suppr_pm" onclick="ajax(event);"
+						title="Retirer le prestataire"></span>
+						'''.format(pm.get_pk()),
+					] for pm in obj_marche.get_pm().all()],
+					'table' : True,
+					'table_header' : [
+						[
+							['Nom', ''],
+							['Nombre de demi-journées pour les animations', ''],
+							['', ''],
+							['', '']
+						]
+					]
+				}
+
+			# Initialisation des attributs du marché
+			attrs_marche = {
+				'dt_deb_marche' : {
+					'label' : 'Date de début du marché', 'value' : obj_marche.get_dt_marche__str()[0]
+				},
+				'dt_fin_marche' : { 'label' : 'Date de fin du marché', 'value' : obj_marche.get_dt_marche__str()[1] },
+				'int_marche' : { 'label' : 'Intitulé du marché', 'value' : obj_marche.get_int_marche() },
+				'prest' : prest,
+				'prest2' : prest2
 			}
 
 			# Initialisation des formulaires et des datatables

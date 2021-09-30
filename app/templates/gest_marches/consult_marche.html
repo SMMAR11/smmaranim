@@ -9,7 +9,9 @@
 		<ul class="custom-nav-tabs nav nav-justified nav-tabs">
 			<li class="active"><a href="#ongl_caract" data-toggle="tab">Caractéristiques</a></li>
 			<li><a href="#ongl_projets" data-toggle="tab">Projets</a></li>
+			{% if m.diffe_ani_ponc_pro_peda_marche %}
 			<li><a href="#ongl_dj_prep_real" data-toggle="tab">Demi-journées de préparation et de réalisation</a></li>
+			{% endif %}
 		</ul>
 		<div class="tab-content">
 			<div id="ongl_caract" class="active fade in tab-pane">
@@ -23,6 +25,7 @@
 						<span class="add-icon icon-with-text" data-target="#fm_ajout_pm" data-toggle="modal">Ajouter un prestataire au marché</span>
 					</div>
 					{{ attrs_marche.prest }}
+					{{ attrs_marche.prest2 }}
 				</div>
 			</div>
 			<div id="ongl_projets" class="fade tab-pane">
@@ -32,6 +35,7 @@
 				</form>
 				{{ dtables_chois_pm.projet | safe }}
 			</div>
+			{% if m.diffe_ani_ponc_pro_peda_marche %}
 			<div id="ongl_dj_prep_real" class="fade tab-pane">
 				<form action="?action=choisir-prestataire&onglet=gest_prep_real" method="post" name="form_chois_pm__gest_prep_real" onsubmit="ajax(event);">
 					{% csrf_token %}
@@ -39,6 +43,7 @@
 				</form>
 				{{ dtables_chois_pm.gest_prep_real | safe }}
 			</div>
+			{% endif %}
 		</div>
 	</div>
 	<div class="br-sm col-sm-3">
