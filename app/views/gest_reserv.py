@@ -40,7 +40,7 @@ def ger_reserv(_req, _inst) :
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TReservation
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import Http404
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
@@ -131,7 +131,7 @@ def chois_reserv(_req) :
 	from app.functions.form_init import sub as form_init
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TReservation
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import HttpResponse
 	from django.shortcuts import render
 	import json
@@ -229,7 +229,7 @@ def consult_reserv(_req, _r) :
 	from app.models import TReservation
 	from app.models import TUtilisateur
 	from django.http import HttpResponse
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.shortcuts import get_object_or_404
 	from django.shortcuts import render
 	from smmaranim.custom_settings import ALERTS

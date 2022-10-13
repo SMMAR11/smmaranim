@@ -40,7 +40,7 @@ def ger_projet(_req, _inst) :
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TProjet
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import Http404
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
@@ -180,7 +180,7 @@ def consult_projet(_req, _p) :
 	from app.functions.yes_or_no import sub as yes_or_no
 	from app.models import TProjet
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.forms import formset_factory
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404

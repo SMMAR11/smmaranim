@@ -147,7 +147,7 @@ class TUtilisateur(User) :
 	def get_type_util__list(self) : return [tu.get_pk() for tu in self.get_type_util().all()]
 	def get_util_connect(_req) :
 		from app.models import TUtilisateur
-		return TUtilisateur.objects.get(pk = _req.user.pk) if _req.user.is_authenticated() else None
+		return TUtilisateur.objects.get(pk = _req.user.pk) if _req.user.is_authenticated else None
 
 	def __str__(self) : return self.get_username()
 
@@ -520,7 +520,7 @@ class TProjet(models.Model) :
 
 		# Imports
 		from app.functions.attributes_init import sub
-		from django.core.urlresolvers import reverse
+		from django.urls import reverse
 
 		# Initialisation des attributs du projet
 		attrs = {
@@ -1103,7 +1103,7 @@ class TBilanAnimation(TBilan) :
 		from django.conf import settings
 		return '{}{}'.format(settings.MEDIA_URL, self.get_rdp_3_ba()) if self.get_rdp_3_ba() else None
 
-	def __str__(self) : return self.get_bilan()
+	#def __str__(self) : return self.get_bilan()
 
 class TPlaquettesDistribuees(models.Model) :
 

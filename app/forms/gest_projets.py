@@ -116,7 +116,7 @@ class FiltrerProjet(forms.Form) :
 
 		# Imports
 		from app.models import TProjet
-		from django.core.urlresolvers import reverse
+		from django.urls import reverse
 
 		# Stockage des données du formulaire
 		if _req.method == 'GET' :

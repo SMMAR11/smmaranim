@@ -11,7 +11,7 @@ def sub(_req, _mod, _lim) :
 
 	# Imports
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.template.defaultfilters import safe
 
 	# Obtention du menu utilisateur

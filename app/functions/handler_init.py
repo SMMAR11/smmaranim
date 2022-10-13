@@ -12,8 +12,7 @@ def sub(_req, _sc, _mess) :
 	# Imports
 	from app.apps import AppConfig
 	from app.functions.include_init import sub as include_init
-	from django.shortcuts import render_to_response
-	from django.template import RequestContext
+	from django.shortcuts import render
 
 	# Initialisation des fichiers d'inclusion
 	includes = [
@@ -28,14 +27,15 @@ def sub(_req, _sc, _mess) :
 	]	
 
 	# Affichage du template
-	output = render_to_response(
+	output = render(
+		_req,
 		'./handler.html',
-		RequestContext(_req, {
+		{
 			'app_name' : AppConfig.verbose_name,
 			'includes' : ''.join([include_init(elem) for elem in includes]),
 			'message' : _mess,
 			'title' : 'Erreur {}'.format(_sc)
-		})
+		}
 	)
 
 	# Renseignement du code d'erreur

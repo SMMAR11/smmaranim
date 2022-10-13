@@ -147,3 +147,7 @@ ADMINS = [(
 )]
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'mail_dumps')
+
+# Upgrade Python 3.8/Django 3.2
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

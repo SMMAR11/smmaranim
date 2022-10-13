@@ -6,7 +6,7 @@ def set_alerts(_req) :
 	from app.models import TReservation
 	from app.models import TUtilisateur
 	from datetime import date
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from smmaranim.custom_settings import PKS
 	from smmaranim.custom_settings import SMMAR_SUPPORT
 
@@ -191,7 +191,7 @@ def set_menus(_req) :
 
 	# Imports
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 
 	output = {}
 

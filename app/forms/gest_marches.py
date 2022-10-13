@@ -91,7 +91,7 @@ class FiltrerMarche(forms.Form) :
 
 		# Imports
 		from app.models import TMarche
-		from django.core.urlresolvers import reverse
+		from django.urls import reverse
 
 		# Stockage des données du formulaire
 		if _req.method == 'GET' :
@@ -225,7 +225,7 @@ class ChoisirPrestataireMarche(forms.Form) :
 	def get_datatable(self, _req, *args, **kwargs) :
 
 		# Import
-		from django.core.urlresolvers import reverse
+		from django.urls import reverse
 
 		# Stockage des données du formulaire
 		val_prest = self.fields['zl_prest'].initial if _req.method == 'GET' else self.cleaned_data.get('zl_prest')

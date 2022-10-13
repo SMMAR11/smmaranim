@@ -41,7 +41,7 @@ def ger_anim(_req, _inst) :
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TAnimation
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import Http404
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
@@ -193,7 +193,7 @@ def chois_anim(_req) :
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TAnimation
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import HttpResponse
 	from django.shortcuts import render
 	import json
@@ -293,7 +293,7 @@ def consult_anim(_req, _a) :
 	from app.models import TAnimation
 	from app.models import TBilan
 	from app.models import TUtilisateur
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.forms import formset_factory
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404

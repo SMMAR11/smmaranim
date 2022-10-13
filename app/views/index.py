@@ -19,7 +19,7 @@ def index(_req) :
 	from django.contrib.auth import authenticate
 	from django.contrib.auth import login
 	from django.contrib.auth import logout
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import HttpResponse
 	from django.shortcuts import render
 	import json
@@ -99,7 +99,7 @@ def index(_req) :
 				'form_auth' : form_init(form_auth),
 				'menu' : menu_init(_req, '__ALL__', 3),
 				'modals' : modals,
-				'title' : 'Accueil' if _req.user.is_authenticated() else 'Identification'
+				'title' : 'Accueil' if _req.user.is_authenticated else 'Identification'
 			})
 
 	else :

@@ -40,7 +40,7 @@ def ger_marche(_req, _inst) :
 	from app.functions.form_init import sub as form_init
 	from app.functions.modal_init import sub as modal_init
 	from app.models import TMarche
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.http import Http404
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404
@@ -166,7 +166,7 @@ def consult_marche(_req, _m) :
 	from app.models import TPrestatairesMarche
 	from app.models import TProjet
 	from app.models import TTransactionDemiJournees
-	from django.core.urlresolvers import reverse
+	from django.urls import reverse
 	from django.forms import formset_factory
 	from django.http import HttpResponse
 	from django.shortcuts import get_object_or_404

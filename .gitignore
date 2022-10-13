@@ -1,5 +1,6 @@
 .env
-app/migrations/
+app/migrations/*
+!app/migrations/__init__.py
 csv/
 mail_dumps/
 media/
