@@ -573,8 +573,13 @@ class TProjet(models.Model) :
 		return sub(attrs, _pdf)
 
 	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_refer_projet(), self.get_prenom_refer_projet())
-	def get_tel_refer_projet__deconstructed(self) :
-		t = iter(self.get_tel_refer_projet()); return '-'.join(a + b for a, b in zip(t, t))
+	def get_tel_refer_projet__deconstructed(self):
+		tel_refer_projet = self.get_tel_refer_projet()
+		if tel_refer_projet:
+			t = iter(tel_refer_projet)
+			return '-'.join(a + b for a, b in zip(t, t))
+		return tel_refer_projet
+
 	def get_type_interv(self) :
 		from app.models import TTypeIntervention
 		return self.get_sti().get_type_interv() if self.get_sti() else TTypeIntervention.objects.get(pk = 'AP')
@@ -1371,8 +1376,12 @@ class TReservation(models.Model) :
 	def get_quand_monter__str(self) :
 		from app.functions.get_local_format import sub
 		return sub(self.get_quand_monter()) if self.get_quand_monter() else None
-	def get_tel_refer_reserv__deconstructed(self) :
-		t = iter(self.get_tel_refer_reserv()); return '-'.join(a + b for a, b in zip(t, t))
+	def get_tel_refer_reserv__deconstructed(self):
+		tel_refer_reserv = self.get_tel_refer_reserv()
+		if tel_refer_reserv:
+			t = iter(tel_refer_reserv)
+			return '-'.join(a + b for a, b in zip(t, t))
+		return tel_refer_reserv
 
 	def __str__(self) :
 		return '{} - {} - {}'.format(self.get_nom_complet(), self.get_outil(), self.get_dt_reserv__fr_str())
@@ -1429,7 +1438,12 @@ class TReferentReservation(models.Model) :
 	# Méthodes
 	def get_expos__count(self) : return self.get_expos().count()
 	def get_nom_complet(self) : return '{} {}'.format(self.get_nom_rr(), self.get_prenom_rr())
-	def get_tel_rr__deconstructed(self) : t = iter(self.get_tel_rr()); return '-'.join(a + b for a, b in zip(t, t))
+	def get_tel_rr__deconstructed(self):
+		tel_rr = self.get_tel_rr()
+		if tel_rr:
+			t = iter(tel_rr)
+			return '-'.join(a + b for a, b in zip(t, t))
+		return tel_rr
 
 	def __str__(self) : return self.get_nom_complet()
 
