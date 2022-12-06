@@ -82,8 +82,8 @@ $(window).on('load', function() {
 			}),
 			'prest2' : init_datatable('#dtable_prest2', {
 				'autofit' : [2, 3],
-				'unbordered' : [2, 3],
-				'unsorting' : [1, 2, 3]
+				'unbordered' : [5, 6],
+				'unsorting' : [5, 6]
 			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' })

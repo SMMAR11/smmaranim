@@ -26,7 +26,7 @@ def set_alerts(_req) :
 		for pm in obj_util_connect.get_org().get_pm().all() :
 
 			# Renvoi d'une alerte en cas de dépassement du marché en animations ponctuelles
-			if pm.get_nbre_dj_ap_rest_pm(False) < 0 :
+			if pm.get_nbre_dj_ap_pm() > 0 and pm.get_nbre_dj_ap_rest_pm(False) < 0 :
 
 				# Calcul du taux de dépassement
 				taux = (abs(pm.get_nbre_dj_ap_rest_pm(False)) / pm.get_nbre_dj_ap_pm()) * 100
@@ -51,7 +51,7 @@ def set_alerts(_req) :
 
 			# Renvoi d'une alerte en cas de dépassement du marché en programmes pédagogiques
 			for elem in [pm.get_nbre_dj_pp_rest_pm(False, False), pm.get_nbre_dj_pp_rest_pm(True, False)] :
-				if elem < 0 :
+				if pm.get_nbre_dj_pp_pm() > 0 and elem < 0 :
 
 					# Calcul du taux de dépassement
 					taux = (abs(elem) / pm.get_nbre_dj_pp_pm()) * 100

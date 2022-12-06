@@ -146,7 +146,14 @@ class FiltrerMarche(forms.Form) :
 class GererPrestataireMarche(forms.ModelForm) :
 
 	# Champ
-	zl_prest = forms.ModelChoiceField(label = 'Prestataire', queryset = None)
+	zl_prest = forms.ModelChoiceField(
+		label='Prestataire (mandataire)', queryset=None
+	)
+	zl_prest2 = forms.ModelChoiceField(
+		label='Prestataire (co-traitant ou sous-traitant)',
+		queryset=None,
+		required=False
+	)
 
 	class Meta :
 
@@ -166,20 +173,15 @@ class GererPrestataireMarche(forms.ModelForm) :
 
 		super(GererPrestataireMarche, self).__init__(*args, **kwargs)
 
-		# Initialisation des choix de la liste déroulante des prestataires
-		if self.instance.get_pk() :
-			prests = TOrganisme.objects.filter(pk = self.instance.get_prest().get_pk())
-		else :
-			prests = TOrganisme.objects \
-			.filter(est_prest = True) \
-			.exclude(pk__in = [pm.get_prest().get_pk() for pm in self.kw_marche.get_pm().all()])
-
 		# Définition des choix de la liste déroulante des prestataires
+		prests = TOrganisme.objects.filter(est_prest=True)
 		self.fields['zl_prest'].queryset = prests
+		self.fields['zl_prest2'].queryset = prests
 
 		# Personnalisation du champ prestataire
 		if self.instance.get_pk() :
-			self.fields['zl_prest'].empty_label = None; self.fields['zl_prest'].initial = self.instance.get_prest()
+			self.fields['zl_prest'].initial = self.instance.get_prest()
+			self.fields['zl_prest2'].initial = self.instance.get_prest2()
 
 		# Gestion d'affichage des champs "Nombre de demi-journées"
 		# selon le type de marché
@@ -194,11 +196,13 @@ class GererPrestataireMarche(forms.ModelForm) :
 		# Stockage des données du formulaire
 		cleaned_data = self.cleaned_data
 		val_prest = cleaned_data.get('zl_prest')
+		val_prest2 = cleaned_data.get('zl_prest2')
 
 		# Création/modification d'une instance TPrestatairesMarche
 		obj = super(GererPrestataireMarche, self).save(commit = False)
 		obj.id_marche = self.kw_marche
 		obj.id_prest = val_prest
+		obj.id_prest2 = val_prest2
 		obj.save()
 
 		return obj
@@ -225,25 +229,31 @@ class ChoisirPrestataireMarche(forms.Form) :
 	def get_datatable(self, _req, *args, **kwargs) :
 
 		# Import
+		from app.models import TOrganisme
+		from app.models import TProjet
 		from django.urls import reverse
 
 		# Stockage des données du formulaire
 		val_prest = self.fields['zl_prest'].initial if _req.method == 'GET' else self.cleaned_data.get('zl_prest')
 
-		# Tentative d'obtention d'une instance TPrestatairesMarche
-		obj_pm = self.kw_marche.get_pm().get(id_prest = val_prest) if val_prest else None
+		# Instances TPrestatairesMarche
+		if val_prest:
+			qPm = self.kw_marche.get_pm().get_lots(oOrg=val_prest)
+		else:
+			qPm = None
 
 		trs = []
 		if self.kw_onglet == 'gest_prep_real' :
 
 			# Empilement des balises <tr/>
-			if obj_pm :
-				trs += [[
-					tdj.get_pm().get_prest(),
-					tdj.get_int_tdj(),
-					tdj.get_nbre_dj_tdj_progr__str(),
-					tdj.get_nbre_dj_tdj_util__str()
-				] for tdj in obj_pm.get_tdj().all()]
+			if val_prest and qPm:
+				for pm in qPm:
+					trs += [[
+						tdj.get_pm().get_prests(),
+						tdj.get_int_tdj(),
+						tdj.get_nbre_dj_tdj_progr__str(),
+						tdj.get_nbre_dj_tdj_util__str()
+					] for tdj in pm.get_tdj().all()]
 
 			# Mise en forme de la datatable
 			output = '''
@@ -268,7 +278,7 @@ class ChoisirPrestataireMarche(forms.Form) :
 		else :
 
 			# Empilement des balises <tr/>
-			if obj_pm :
+			if val_prest and qPm:
 				trs += [[
 					p.get_int_projet(),
 					p.get_org(),
@@ -278,7 +288,7 @@ class ChoisirPrestataireMarche(forms.Form) :
 					'''
 					<a href="{}" class="inform-icon pull-right" title="Consulter le projet"></a>
 					'''.format(reverse('consult_projet', args = [p.get_pk()]))
-				] for p in obj_pm.get_projet().all()]
+				] for p in TProjet.objects.filter(id_org=val_prest, id_pm__in=qPm.values_list('id', flat=True))]
 
 
 			output = '''

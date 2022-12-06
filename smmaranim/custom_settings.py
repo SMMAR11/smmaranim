@@ -125,7 +125,7 @@ MENU = {
 		},
 		'mod_name' : 'Gestion des marchés',
 		'mod_rank' : 1,
-		'mod_rights' : ['A'],
+		'mod_rights' : ['A', 'PGDM'],
 		'mod_url_name' : 'gest_marches'
 	},
 	'gest_reserv' : {

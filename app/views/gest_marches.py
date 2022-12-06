@@ -175,6 +175,7 @@ def consult_marche(_req, _m) :
 	from functools import partial
 	from functools import wraps
 	import json
+	from app.models import VPrestatairesMarche
 
 	output = None
 
@@ -249,7 +250,7 @@ def consult_marche(_req, _m) :
 				# Affichage du message de succès
 				output = HttpResponse(
 					json.dumps({ 'success' : {
-						'message' : 'Le prestataire a été retiré du marché avec succès.', 'redirect' : '__RELOAD__'
+						'message' : 'Le lot a été retiré avec succès.', 'redirect' : '__RELOAD__'
 					}}),
 					content_type = 'application/json'
 				)
@@ -314,7 +315,7 @@ def consult_marche(_req, _m) :
 				prest = {
 					'label' : 'Prestataire(s) lié(s) au marché',
 					'value' : [[
-						str(pm.get_prest()),
+						pm.get_prests(),
 						pm.get_nbre_dj_ap_pm__str(),
 						pm.get_nbre_dj_progr_pm('AP'),
 						pm.get_nbre_dj_ap_rest_pm(),
@@ -343,7 +344,7 @@ def consult_marche(_req, _m) :
 					'table' : True,
 					'table_header' : [
 						[
-							['Nom', 'rowspan:4'],
+							['Prestataires du lot', 'rowspan:4'],
 							['Nombre de demi-journées', 'colspan:9'],
 							['', 'rowspan:4'],
 							['', 'rowspan:4'],
@@ -374,10 +375,13 @@ def consult_marche(_req, _m) :
 			else:
 				prest = {}
 				prest2 = {
-					'label' : 'Prestataire(s) lié(s) au marché',
+					'label' : 'Lot(s) du marché',
 					'value' : [[
-						str(pm.get_prest()),
+						pm.get_prests(),
 						pm.get_nbre_dj_ani_pm__str(),
+						VPrestatairesMarche.objects.get(pk=pm.id).pm_pro_m,
+						VPrestatairesMarche.objects.get(pk=pm.id).pm_pro_ctst,
+						VPrestatairesMarche.objects.get(pk=pm.id).pm_res,
 						'''
 						<span action="?action=initialiser-formulaire-modification-prestataire&id={}"
 						class="icon-without-text modify-icon" modal-suffix="modif_pm" onclick="ajax(event);"
@@ -392,10 +396,16 @@ def consult_marche(_req, _m) :
 					'table' : True,
 					'table_header' : [
 						[
-							['Nom', ''],
-							['Nombre de demi-journées pour les animations', ''],
-							['', ''],
-							['', '']
+							['Prestataires du lot', 'rowspan:2'],
+							['Nombre de demi-journées pour les animations', 'colspan:4'],
+							['', 'rowspan:2'],
+							['', 'rowspan:2']
+						],
+						[
+							['Prévues', ''],
+							['Programmées (M)', ''],
+							['Programmées (C-T/S-T)', ''],
+							['Restantes', '']
 						]
 					]
 				}
@@ -422,7 +432,7 @@ def consult_marche(_req, _m) :
 			modals = [
 				modal_init(
 					'ajout_pm',
-					'Ajouter un prestataire au marché',
+					'Ajouter un lot au marché',
 					ger_pm(_req, { 'kw_marche' : obj_marche, 'prefix' : prefix_ajout_pm })
 				),
 				modal_init(
@@ -440,9 +450,9 @@ def consult_marche(_req, _m) :
 						csrf(_req)['csrf_token'], *GererTransactionDemiJournees(kw_init = True).get_datatable(_req)
 					)
 				),
-				modal_init('modif_pm', 'Modifier un prestataire'),
+				modal_init('modif_pm', 'Modifier un lot'),
 				modal_init('suppr_marche', 'Êtes-vous sûr de vouloir supprimer définitivement le marché ?'),
-				modal_init('suppr_pm', 'Êtes-vous sûr de vouloir retirer définitivement le prestataire de ce marché ?')
+				modal_init('suppr_pm', 'Êtes-vous sûr de vouloir retirer définitivement le lot ?')
 			]
 
 			# Affichage du template
@@ -490,8 +500,8 @@ def consult_marche(_req, _m) :
 					output = HttpResponse(
 						json.dumps({ 'success' : {
 							'message' : '''
-							Le prestataire a été {} avec succès.
-							'''.format('modifié' if params['instance'] else 'ajouté au marché'),
+							Le lot a été {} avec succès.
+							'''.format('modifié' if params['instance'] else 'ajouté'),
 							'redirect' : '__RELOAD__'
 						}}),
 						content_type = 'application/json'
@@ -566,7 +576,7 @@ def consult_marche(_req, _m) :
 					# Affichage du message de succès
 					output = HttpResponse(
 						json.dumps({ 'success' : {
-							'message' : 'Le prestataire a été modifié avec succès.', 'redirect' : '__RELOAD__'
+							'message' : 'Le lot a été modifié avec succès.', 'redirect' : '__RELOAD__'
 						}}),
 						content_type = 'application/json'
 					)

@@ -95,7 +95,7 @@ class FiltrerProjet(forms.Form) :
 
 	# Champs
 	zl_org = forms.ModelChoiceField(
-		label = 'Organisme bénéficiant du projet',
+		label = 'Organisme animateur du projet',
 		queryset = TOrganisme.objects.all(),
 		required = False
 	)

@@ -1,8 +1,10 @@
 # coding: utf-8
 
 # Imports
+from app.managers import *
 from django.contrib.auth.models import User
 from django.db import models
+from django_pgviews import view
 
 class TTypeUtilisateur(models.Model) :
 
@@ -49,7 +51,10 @@ class TOrganisme(models.Model) :
 	def get_nom_org(self) : return self.nom_org
 
 	# Autres getters
-	def get_pm(self) : return self.tprestatairesmarche_set
+	def get_pm(self) :
+		#return self.tprestatairesmarche_set
+		from django.db.models import Q
+		return TPrestatairesMarche.objects.filter(Q(id_prest=self.pk) | Q(id_prest2=self.pk))
 
 	def __str__(self) : return self.get_nom_org()
 
@@ -178,12 +183,12 @@ class TMarche(models.Model) :
 	dt_marche = ArrayField(base_field = models.DateField(), size = 2)
 	int_marche = models.CharField(max_length = 255, verbose_name = 'Intitulé du marché')
 	diffe_ani_ponc_pro_peda_marche = models.BooleanField(
-		default=True,
+		default=False,
 		verbose_name='Différencier les animations ponctuelles et les programmes pédagogiques ?'
 	)
 
 	# Relation
-	prest = models.ManyToManyField(TOrganisme, through = 'TPrestatairesMarche')
+	#prest = models.ManyToManyField(TOrganisme, through='TPrestatairesMarche')
 
 	class Meta :
 		db_table = 't_marche'
@@ -194,7 +199,12 @@ class TMarche(models.Model) :
 	def get_pk(self) : return self.pk
 	def get_dt_marche(self) : return self.dt_marche
 	def get_int_marche(self) : return self.int_marche
-	def get_prest(self) : return self.prest
+	def get_prest(self):
+		#return self.prest
+		from django.db.models import Q
+		id_prests = TPrestatairesMarche.objects.filter(id_marche=self.pk).values_list('id_prest', flat=True)
+		id_prests2 = TPrestatairesMarche.objects.filter(id_marche=self.pk).values_list('id_prest2', flat=True)
+		return TOrganisme.objects.filter(Q(pk__in=id_prests) | Q(pk__in=id_prests2))
 
 	# Autres getters
 	def get_pm(self) : return self.tprestatairesmarche_set
@@ -214,7 +224,9 @@ class TPrestatairesMarche(models.Model) :
 
 	# Attributs
 	id_marche = models.ForeignKey(TMarche, on_delete = models.CASCADE)
-	id_prest = models.ForeignKey(TOrganisme, on_delete = models.CASCADE)
+	id_prest = models.ForeignKey(
+		TOrganisme, on_delete=models.CASCADE, related_name='prest1'
+	)
 	nbre_dj_ap_pm = models.FloatField(
 		default = 0,
 		validators = [MinValueValidator(0), valid_dj],
@@ -230,15 +242,26 @@ class TPrestatairesMarche(models.Model) :
 		validators=[MinValueValidator(0), valid_dj],
 		verbose_name='Nombre de demi-journées pour les animations'
 	)
+	id_prest2 = models.ForeignKey(
+		TOrganisme,
+		blank=True,
+		null=True,
+		on_delete=models.CASCADE,
+		related_name='prest2'
+	)
+
+	objects = PrestatairesMarcheManager()
 
 	class Meta :
 		db_table = 't_prestataires_marche'
+		ordering = ['-id_marche__dt_marche']
 		verbose_name = verbose_name_plural = 'T_PRESTATAIRES_MARCHE'
 
 	# Getters
 	def get_pk(self) : return self.pk
 	def get_marche(self) : return self.id_marche
 	def get_prest(self) : return self.id_prest
+	def get_prest2(self) : return self.id_prest2
 	def get_nbre_dj_ap_pm(self) : return self.nbre_dj_ap_pm
 	def get_nbre_dj_pp_pm(self) : return self.nbre_dj_pp_pm
 
@@ -273,6 +296,12 @@ class TPrestatairesMarche(models.Model) :
 		self.get_nbre_dj_progr_pm('PP', False) + self.get_nbre_dj_prep_real_pm(False, False)
 		output = terme_1 - terme_2
 		return '{0:g}'.format(output) if _str == True else output
+
+	def get_prests(self):
+		return '{} (M){}'.format(
+			self.get_prest(),
+			' - {} (C-T/S-T)'.format(self.get_prest2()) if self.get_prest2() else ''
+		)
 
 	def __str__(self) : return '{} - {}'.format(self.get_prest(), self.get_marche())
 
@@ -456,25 +485,25 @@ class TProjet(models.Model) :
 	courr_refer_projet = models.EmailField(
 		blank = True,
 		null = True,
-		verbose_name = 'Courriel du contact référent de l\'organisme bénéficiant du projet'
+		verbose_name = 'Courriel du contact référent de l\'organisme animateur du projet'
 	)
 	int_projet = models.CharField(max_length = 255, verbose_name = 'Intitulé du projet')
 	nom_refer_projet = models.CharField(
 		max_length = 255,
-		verbose_name = 'Nom de famille du contact référent de l\'organisme bénéficiant du projet'
+		verbose_name = 'Nom de famille du contact référent de l\'organisme animateur du projet'
 	)
 	prenom_refer_projet = models.CharField(
 		blank = True,
 		max_length = 255,
 		null = True,
-		verbose_name = 'Prénom du contact référent de l\'organisme bénéficiant du projet'
+		verbose_name = 'Prénom du contact référent de l\'organisme animateur du projet'
 	)
 	tel_refer_projet = models.CharField(
 		blank = True,
 		max_length = 10,
 		null = True,
 		validators = [RegexValidator(r'^[0-9]{10}')],
-		verbose_name = 'Numéro de téléphone du contact référent de l\'organisme bénéficiant du projet'
+		verbose_name = 'Numéro de téléphone du contact référent de l\'organisme animateur du projet'
 	)
 	id_org = models.ForeignKey(TOrganisme, on_delete = models.CASCADE)
 	id_pm = models.ForeignKey(TPrestatairesMarche, null = True, on_delete = models.CASCADE)
@@ -548,22 +577,22 @@ class TProjet(models.Model) :
 			},
 			'comm_projet' : { 'label' : 'Commentaire', 'value' : self.get_comm_projet() },
 			'courr_refer_projet' : { 
-				'label' : 'Courriel du contact référent de l\'organisme bénéficiant du projet',
+				'label' : 'Courriel du contact référent de l\'organisme animateur du projet',
 				'value' : self.get_courr_refer_projet()
 			},
 			'int_projet' : { 'label' : 'Intitulé du projet', 'value' : self.get_int_projet() },
 			'marche' : { 'label' : 'Marché', 'value' : self.get_pm().get_marche() if self.get_pm() else None },
 			'org' : {
-				'label' : 'Organisme bénéficiant du projet',
+				'label' : 'Organisme animateur du projet',
 				'value' : self.get_org()
 			},
 			'refer_projet' : {
-				'label' : 'Nom complet du contact référent de l\'organisme bénéficiant du projet',
+				'label' : 'Nom complet du contact référent de l\'organisme animateur du projet',
 				'value' : self.get_nom_complet()
 			},
 			'sti' : { 'label' : 'Événement', 'value' : self.get_sti() },
 			'tel_refer_projet' : {
-				'label' : 'Numéro de téléphone du contact référent de l\'organisme bénéficiant du projet',
+				'label' : 'Numéro de téléphone du contact référent de l\'organisme animateur du projet',
 				'value' : self.get_tel_refer_projet__deconstructed()
 			},
 			'type_interv' : { 'label' : 'Type d\'intervention', 'value' : self.get_type_interv() },
@@ -1498,3 +1527,48 @@ class TExposition(models.Model) :
 
 	def __str__(self) :
 		return '{} - {} - {}'.format(self.get_lieu_expos(), self.get_comm(), self.get_dt_expos__fr_str())
+
+class VPrestatairesMarche(view.View) :
+
+	pm_id = models.IntegerField(primary_key=True)
+	pm_pro_m = models.IntegerField()
+	pm_pro_ctst = models.IntegerField()
+	pm_res = models.IntegerField()
+
+    # Requête
+	sql = '''
+	WITH QR AS (
+	    SELECT
+	        PM.id,
+	        PM.nbre_dj_ani_pm
+	    FROM public.t_prestataires_marche AS PM
+	        INNER JOIN public.t_marche AS MAR
+	        	ON MAR.id_marche = PM.id_marche_id
+	    WHERE MAR.diffe_ani_ponc_pro_peda_marche = false
+	), QR2 AS (
+	    SELECT
+	        PM.id,
+	        PM.id_prest_id,
+	        PM.id_prest2_id,
+	        PRO.id_org_id,
+	        ANI.nbre_dj_anim
+	    FROM public.t_animation AS ANI
+	        INNER JOIN public.t_projet AS PRO
+	        	ON PRO.id_projet = ANI.id_projet_id
+	        INNER JOIN public.t_prestataires_marche AS PM
+	        	ON PM.id = PRO.id_pm_id
+	        INNER JOIN public.t_marche AS MAR
+	        	ON MAR.id_marche = PM.id_marche_id
+	    WHERE MAR.diffe_ani_ponc_pro_peda_marche = false
+	)
+	SELECT
+	    QR.id AS pm_id,
+	    coalesce((SELECT sum(nbre_dj_anim) FROM QR2 WHERE QR.id = QR2.id AND QR2.id_org_id = QR2.id_prest_id), 0) AS pm_pro_m,
+	    coalesce((SELECT sum(nbre_dj_anim) FROM QR2 WHERE QR.id = QR2.id AND QR2.id_org_id = QR2.id_prest2_id), 0) AS pm_pro_ctst,
+	    QR.nbre_dj_ani_pm - coalesce((SELECT sum(nbre_dj_anim) FROM QR2 WHERE QR.id = QR2.id), 0) AS pm_res
+	FROM QR
+	'''
+
+	class Meta :
+		db_table = 'v_prestataires_marche'
+		managed = False
