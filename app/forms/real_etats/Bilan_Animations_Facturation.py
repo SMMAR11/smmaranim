@@ -294,25 +294,19 @@ class Bilan_Animations_Facturation(forms.Form):
 
 					# Images
 					photos = []
-					try:
-						if oBil.get_photo_1_ba():
-							photos.append(oBil.get_photo_1_ba())
-					except:
-						pass
-					try:
-						if oBil.get_photo_2_ba():
-							photos.append(oBil.get_photo_2_ba())
-					except:
-						pass
-					try:
-						if oBil.get_photo_3_ba():
-							photos.append(oBil.get_photo_3_ba())
-					except:
-						pass
+					if oBil.get_photo_1_ba():
+						photos.append(oBil.get_photo_1_ba())
+					if oBil.get_photo_2_ba():
+						photos.append(oBil.get_photo_2_ba())
+					if oBil.get_photo_3_ba():
+						photos.append(oBil.get_photo_3_ba())
 					para = insert_paragraph_after(documentStart)
 					run = para.add_run()
 					for photo in photos:
-						run.add_picture(photo, Mm(60))
+						try:
+							run.add_picture(photo, Mm(60))
+						except:
+							pass
 					documentStart = para
 
 		# Suppression du paragraphe $START$
