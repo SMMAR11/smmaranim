@@ -14,9 +14,9 @@ class Bilan_Animations_Facturation(forms.Form):
 		choices=[EMPTY_VALUE], label='Lot'
 	)
 
-	zd_date_debut = forms.DateField(label='Du')
+	zd_date_debut = forms.DateField(label='Animations du')
 
-	zd_date_fin = forms.DateField(label='Au')
+	zd_date_fin = forms.DateField(label='Animations au')
 
 	# Méthodes Django
 

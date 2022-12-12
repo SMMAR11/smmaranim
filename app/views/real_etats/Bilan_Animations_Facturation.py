@@ -92,5 +92,3 @@ class Bilan_Animations_Facturation(View):
 			return HttpResponse(
 				json.dumps(form.errors), content_type='application/json'
 			)
-
-		return None

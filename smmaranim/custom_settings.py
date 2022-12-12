@@ -169,9 +169,9 @@ MENU = {
 		'mod_items' : {
 			'bilan_projets' : {
 				'item_img' : settings.STATIC_URL + 'images/thumbnails/real_etats/main.png',
-				'item_name' : 'Vue générale des projets',
+				'item_name' : 'Bilan des projets visant le jeune public scolaire',
 				'item_rank' : 1,
-				'item_url_name' : None
+				'item_url_name' : 'bilan_projets_jps'
 			},
 			'bilan_animations_facturation' : {
 				'item_img' : settings.STATIC_URL + 'images/thumbnails/real_etats/main.png',

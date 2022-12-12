@@ -87,12 +87,18 @@ $(window).on('load', function() {
 			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' }),
-			'real_etats_Bilan_Animations_Facturation' : init_datatable(
+			'real_etats_Bilan_Animations_Facturation': init_datatable(
 				'#dtable_real_etats_Bilan_Animations_Facturation', {
 					'autofit': [7],
 					'unsorting': [7]
 				}
-			)
+			),
+			'real_etats_Bilan_Projets_Cible_JPS': init_datatable(
+				'#dtable_real_etats_Bilan_Projets_Cible_JPS', {
+					'autofit': [8],
+					'unsorting': [8]
+				}
+			),
 		};
 
 		// Suppression du loader

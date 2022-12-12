@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from app.views.real_etats import real_etats
 from app.views.real_etats.Bilan_Animations_Facturation import Bilan_Animations_Facturation
+from app.views.real_etats.Bilan_Projets_Cible_JPS import Bilan_Projets_Cible_JPS
 
 urlpatterns = [
 	re_path(r'^admin/', admin.site.urls),
@@ -130,6 +131,7 @@ urlpatterns += [
 
 urlpatterns += [
 	re_path(r'^{}$'.format(real_etats__url), real_etats.get_menu, name = 'real_etats'),
+	re_path(r'^{}bilan-projets-jps/$'.format(real_etats__url), Bilan_Projets_Cible_JPS.as_view(), name = 'bilan_projets_jps'),
 	re_path(r'^{}bilan-animations-facturation/$'.format(real_etats__url), Bilan_Animations_Facturation.as_view(), name = 'bilan_animations_facturation'),
 ]
 
