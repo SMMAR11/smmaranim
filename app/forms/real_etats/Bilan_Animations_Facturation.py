@@ -294,12 +294,21 @@ class Bilan_Animations_Facturation(forms.Form):
 
 					# Images
 					photos = []
-					if oBil.get_photo_1_ba():
-						photos.append(oBil.get_photo_1_ba())
-					if oBil.get_photo_2_ba():
-						photos.append(oBil.get_photo_2_ba())
-					if oBil.get_photo_3_ba():
-						photos.append(oBil.get_photo_3_ba())
+					try:
+						if oBil.get_photo_1_ba():
+							photos.append(oBil.get_photo_1_ba())
+					except:
+						pass
+					try:
+						if oBil.get_photo_2_ba():
+							photos.append(oBil.get_photo_2_ba())
+					except:
+						pass
+					try:
+						if oBil.get_photo_3_ba():
+							photos.append(oBil.get_photo_3_ba())
+					except:
+						pass
 					para = insert_paragraph_after(documentStart)
 					run = para.add_run()
 					for photo in photos:
