@@ -53,7 +53,7 @@ class GererProjet(forms.ModelForm) :
 		# Définition des choix de chaque liste déroulante
 		if 'zl_pm' in self.fields :
 			self.fields['zl_pm'].choices += \
-			[(pm.get_pk(), pm.get_marche()) for pm in self.kw_util.get_org().get_pm().all()]
+			[(pm.get_pk(), pm) for pm in self.kw_util.get_org().get_pm().all()]
 		self.fields['zl_sti'].choices += \
 		[[ti, [(sti.get_pk(), sti) for sti in ti.get_sti().all()]] for ti in TTypeIntervention.objects.all()]
 

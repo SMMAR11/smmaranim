@@ -242,6 +242,7 @@ class TPrestatairesMarche(models.Model) :
 		validators=[MinValueValidator(0), valid_dj],
 		verbose_name='Nombre de demi-journées pour les animations'
 	)
+	numero_lot = models.IntegerField(default=1)
 	id_prest2 = models.ForeignKey(
 		TOrganisme,
 		blank=True,
@@ -264,6 +265,7 @@ class TPrestatairesMarche(models.Model) :
 	def get_prest2(self) : return self.id_prest2
 	def get_nbre_dj_ap_pm(self) : return self.nbre_dj_ap_pm
 	def get_nbre_dj_pp_pm(self) : return self.nbre_dj_pp_pm
+	def get_numero_lot(self): return self.numero_lot
 
 	# Autres getters
 	def get_projet(self) : return self.tprojet_set
@@ -303,7 +305,13 @@ class TPrestatairesMarche(models.Model) :
 			' - {} (C-T/S-T)'.format(self.get_prest2()) if self.get_prest2() else ''
 		)
 
-	def __str__(self) : return '{} - {}'.format(self.get_prest(), self.get_marche())
+	def get_prests_word(self):
+		prests = [str(self.get_prest())]
+		if self.get_prest2():
+			prests.append(str(self.get_prest2()))
+		return ' - '.join(prests)
+
+	def __str__(self) : return '{} - {}'.format(self.get_marche(), self.get_prests())
 
 class TTransactionDemiJournees(models.Model) :
 
@@ -581,7 +589,7 @@ class TProjet(models.Model) :
 				'value' : self.get_courr_refer_projet()
 			},
 			'int_projet' : { 'label' : 'Intitulé du projet', 'value' : self.get_int_projet() },
-			'marche' : { 'label' : 'Marché', 'value' : self.get_pm().get_marche() if self.get_pm() else None },
+			'marche' : { 'label' : 'Marché', 'value' : self.get_pm() },
 			'org' : {
 				'label' : 'Organisme animateur du projet',
 				'value' : self.get_org()
@@ -788,7 +796,9 @@ class TBilan(models.Model) :
 		verbose_name = 'Structure de l\'animateur référent'
 	)
 	id_anim = models.ForeignKey(TAnimation, on_delete = models.CASCADE)
-	id_util = models.ForeignKey(TUtilisateur, on_delete = models.CASCADE)
+	id_util = models.ForeignKey(
+		TUtilisateur, blank=True, null=True, on_delete=models.SET_NULL
+	)
 
 	class Meta :
 		db_table = 't_bilan'
@@ -820,7 +830,7 @@ class TBilan(models.Model) :
 				'label' : 'Fonction de l\'animateur référent',
 				'value' : self.get_fonct_refer_bilan()
 			},
-			'org' : { 'label' : 'Organisme', 'value' : self.get_util().get_org() },
+			'org' : { 'label' : 'Organisme', 'value' : self.get_anim().get_projet().get_org() },
 			'refer_bilan' : {
 				'label' : 'Nom complet de l\'animateur référent',
 				'value' : self.get_nom_complet()
@@ -831,7 +841,7 @@ class TBilan(models.Model) :
 			},
 			'util' : {
 				'label' : 'Utilisateur ayant effectué la dernière modification',
-				'value' : self.get_util().get_nom_complet()
+				'value' : self.get_util().get_nom_complet() if self.get_util() else ''
 			}
 		}
 

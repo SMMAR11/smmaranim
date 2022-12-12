@@ -16,6 +16,8 @@ from django.conf.urls import handler500
 from django.urls import re_path
 from django.conf.urls.static import static
 from django.contrib import admin
+from app.views.real_etats import real_etats
+from app.views.real_etats.Bilan_Animations_Facturation import Bilan_Animations_Facturation
 
 urlpatterns = [
 	re_path(r'^admin/', admin.site.urls),
@@ -32,6 +34,7 @@ gest_projets__url = module__url + 'gestion-projets/'
 gest_anim__url = module__url + 'gestion-animations/'
 gest_reserv__url = module__url + 'gestion-reservations/'
 raccs__url = module__url + 'raccourcis/'
+real_etats__url = module__url + 'real_etats/'
 
 urlpatterns += [
 	re_path(r'^{}$'.format(gest_marches__url), gest_marches.get_menu, name = 'gest_marches'),
@@ -123,6 +126,11 @@ urlpatterns += [
 
 urlpatterns += [
 	re_path(r'^{}$'.format(raccs__url), raccs.get_menu, name = 'raccs'),
+]
+
+urlpatterns += [
+	re_path(r'^{}$'.format(real_etats__url), real_etats.get_menu, name = 'real_etats'),
+	re_path(r'^{}bilan-animations-facturation/$'.format(real_etats__url), Bilan_Animations_Facturation.as_view(), name = 'bilan_animations_facturation'),
 ]
 
 # Possibilité de consulter les pièces jointes

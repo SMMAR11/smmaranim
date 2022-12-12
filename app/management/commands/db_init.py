@@ -32,7 +32,6 @@ class Command(BaseCommand) :
 		attrs_type_util = [
 			{ 'pk' : 'A', 'int_type_util' : 'Administrateur' },
 			{ 'pk' : 'PCDA', 'int_type_util' : 'Peut créer des animations' },
-			{ 'pk' : 'PGDM', 'int_type_util' : 'Peut gérer des marchés' },
 			{ 'pk' : 'PR', 'int_type_util' : 'Peut réserver' }
 		]
 

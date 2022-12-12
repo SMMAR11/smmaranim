@@ -120,6 +120,15 @@
 	width: 19.5px;
 }
 
+.word-icon {
+	background: url('../images/icons/word.png') no-repeat;
+	background-size: 19.5px 19.5px;
+	-webkit-background-size: 18.5px 18.5px;
+	display: block;
+	height: 19.5px;
+	width: 19.5px;
+}
+
 .icon-with-text {
 	color: #555;
 	display: inline;

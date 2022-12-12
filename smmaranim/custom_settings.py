@@ -125,7 +125,7 @@ MENU = {
 		},
 		'mod_name' : 'Gestion des marchés',
 		'mod_rank' : 1,
-		'mod_rights' : ['A', 'PGDM'],
+		'mod_rights' : ['A'],
 		'mod_url_name' : 'gest_marches'
 	},
 	'gest_reserv' : {
@@ -166,11 +166,24 @@ MENU = {
 	},
 	'real_etats' : {
 		'mod_img' : settings.STATIC_URL + 'images/thumbnails/real_etats/main.png',
-		'mod_items' : {},
-		'mod_name' : 'Réalisation d\'états',
+		'mod_items' : {
+			'bilan_projets' : {
+				'item_img' : settings.STATIC_URL + 'images/thumbnails/real_etats/main.png',
+				'item_name' : 'Vue générale des projets',
+				'item_rank' : 1,
+				'item_url_name' : None
+			},
+			'bilan_animations_facturation' : {
+				'item_img' : settings.STATIC_URL + 'images/thumbnails/real_etats/main.png',
+				'item_name' : 'Bilan des animations justificatif de facturation',
+				'item_rank' : 2,
+				'item_url_name' : 'bilan_animations_facturation'
+			}
+		},
+		'mod_name' : 'Bilans',
 		'mod_rank' : 5,
-		'mod_rights' : [],
-		'mod_url_name' : None
+		'mod_rights' : ['A'],
+		'mod_url_name' : 'real_etats'
 	}
 }
 
@@ -202,5 +215,7 @@ REQUIRED_FIELD = '<span class="required-field"></span>'
 RESERVATION_BOUNDS = { 'AM' : ('AM', 'Matin'), 'PM' : ('PM', 'Après-midi'), 'WD' : ('WD', 'Journée entière') }
 
 SMMAR_SUPPORT = config('SMMAR_SUPPORT', cast = bool)
+
+TEMPLATES_ROOT = os.path.join(settings.BASE_DIR, 'templates')
 
 YEAR_OF_CREATION = 2003

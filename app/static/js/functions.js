@@ -103,6 +103,11 @@ function ajax(_e) {
 						}, 2000);
 					}
 
+					// Redirection brute
+					if (datas['success']['redirect'] && !datas['success']['message']) {
+						window.location.href = datas['success']['redirect'];
+					}
+
 					// Réinitialisation d'une datatable
 					if (datas['success']['datatable'] && datas['success']['datatable_key']) {
 

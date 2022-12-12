@@ -69,9 +69,11 @@ admin.site.register(TOutil, Outil)
 
 class Utilisateur(UserAdmin) :
 
+	'''
 	def get_readonly_fields(self, _req, _obj = None) :
 		if _obj : return self.readonly_fields + ('id_org',)
 		return self.readonly_fields
+	'''
 
 	actions = [admin.actions.delete_selected]
 	add_fieldsets = [

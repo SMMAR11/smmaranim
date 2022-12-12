@@ -86,7 +86,13 @@ $(window).on('load', function() {
 				'unsorting' : [5, 6]
 			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
-			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' })
+			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' }),
+			'real_etats_Bilan_Animations_Facturation' : init_datatable(
+				'#dtable_real_etats_Bilan_Animations_Facturation', {
+					'autofit': [7],
+					'unsorting': [7]
+				}
+			)
 		};
 
 		// Suppression du loader
@@ -259,4 +265,13 @@ $('input[type="checkbox"]').on('change', function() {
 			$('#id_' + obj.attr('name') + '__all').prop('checked', false);
 		}
 	}
+});
+
+/**
+ * Edition du bilan des animations justificatif de facturation
+ */
+$('#bt_editBilan_Animations_Facturation').on('click', function() {
+	$('form[name="form_real_etats_Bilan_Animations_Facturation"').attr('action', '?action=editer-bilan');
+	$('form[name="form_real_etats_Bilan_Animations_Facturation"').submit();
+	$('form[name="form_real_etats_Bilan_Animations_Facturation"').attr('action', '');
 });
