@@ -303,7 +303,7 @@ class Bilan_Animations_Facturation(forms.Form):
 					para = insert_paragraph_after(documentStart)
 					run = para.add_run()
 					for photo in photos:
-						run.add_picture(photo, Mm(180/len(photos)))
+						run.add_picture(photo, Mm(60))
 					documentStart = para
 
 		# Suppression du paragraphe $START$
