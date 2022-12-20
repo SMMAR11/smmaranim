@@ -242,7 +242,7 @@ class TPrestatairesMarche(models.Model) :
 		validators=[MinValueValidator(0), valid_dj],
 		verbose_name='Nombre de demi-journées pour les animations'
 	)
-	numero_lot = models.IntegerField(default=1)
+	numero_lot = models.IntegerField(verbose_name='Numéro de lot')
 	id_prest2 = models.ForeignKey(
 		TOrganisme,
 		blank=True,
@@ -255,7 +255,7 @@ class TPrestatairesMarche(models.Model) :
 
 	class Meta :
 		db_table = 't_prestataires_marche'
-		ordering = ['-id_marche__dt_marche']
+		ordering = ['-id_marche__dt_marche', 'numero_lot']
 		verbose_name = verbose_name_plural = 'T_PRESTATAIRES_MARCHE'
 
 	# Getters
@@ -300,18 +300,14 @@ class TPrestatairesMarche(models.Model) :
 		return '{0:g}'.format(output) if _str == True else output
 
 	def get_prests(self):
-		return '{} (M){}'.format(
-			self.get_prest(),
-			' - {} (C-T/S-T)'.format(self.get_prest2()) if self.get_prest2() else ''
-		)
-
-	def get_prests_word(self):
 		prests = [str(self.get_prest())]
 		if self.get_prest2():
 			prests.append(str(self.get_prest2()))
 		return ' - '.join(prests)
 
-	def __str__(self) : return '{} - {}'.format(self.get_marche(), self.get_prests())
+	def __str__(self) : return '{} - Lot n° {} - {}'.format(
+		self.get_marche(), self.get_numero_lot(), self.get_prests()
+	)
 
 class TTransactionDemiJournees(models.Model) :
 

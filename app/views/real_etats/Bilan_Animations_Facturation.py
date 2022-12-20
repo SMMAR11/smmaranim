@@ -65,6 +65,7 @@ class Bilan_Animations_Facturation(View):
 				cleanedData = form.cleaned_data
 				getParameters = {
 					'action': 'editer-bilan',
+					'presta': cleanedData['zl_presta'],
 					'marcheLot': cleanedData['zl_marche_lot'],
 					'marcheLotBilanPeriodeDu': cleanedData['zd_date_debut'],
 					'marcheLotBilanPeriodeAu': cleanedData['zd_date_fin']

@@ -76,14 +76,14 @@ $(window).on('load', function() {
 			'plaq' : init_datatable('#dtable_plaq', { 'autofit' : [0], 'unsorting' : [0] }),
 			'point' : init_datatable('#dtable_point'),
 			'prest' : init_datatable('#dtable_prest', {
-				'autofit' : [2, 3, 4],
-				'unbordered' : [10, 11, 12],
-				'unsorting' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+				'autofit' : [3, 4, 5],
+				'unbordered' : [11, 12, 13],
+				'unsorting' : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 			}),
 			'prest2' : init_datatable('#dtable_prest2', {
-				'autofit' : [2, 3],
-				'unbordered' : [5, 6],
-				'unsorting' : [5, 6]
+				'autofit' : [3, 4],
+				'unbordered' : [6, 7],
+				'unsorting' : [6, 7]
 			}),
 			'zcc_plaq' : init_datatable('#dtable_zcc_plaq', { 'autofit' : [0, 2], 'paging' : true, 'unsorting' : '_all' }),
 			'zl_outil' : init_datatable('#dtable_zl_outil', { 'autofit' : [0, 3], 'paging' : true, 'unsorting' : '_all' }),

@@ -19,6 +19,7 @@ def ger_pm(_req, _kwargs) :
 	return '''
 	<form action="?action={}-prestataire" method="post" name="form_{}_pm" onsubmit="ajax(event);">
 		<input name="csrfmiddlewaretoken" type="hidden" value="{}">
+		{}
 		<div class="row">
 			<div class="col-md-6">{}</div>
 			<div class="col-md-6">{}</div>
@@ -34,6 +35,7 @@ def ger_pm(_req, _kwargs) :
 		'modifier' if 'instance' in _kwargs else 'ajouter',
 		'modif' if 'instance' in _kwargs else 'ajout',
 		csrf(_req)['csrf_token'],
+		form['numero_lot'],
 		form['zl_prest'],
 		form['zl_prest2'],
 		form.get('nbre_dj_ap_pm') or '',

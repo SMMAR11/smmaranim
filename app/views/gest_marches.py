@@ -315,6 +315,7 @@ def consult_marche(_req, _m) :
 				prest = {
 					'label' : 'Prestataire(s) lié(s) au marché',
 					'value' : [[
+						pm.get_numero_lot(),
 						pm.get_prests(),
 						pm.get_nbre_dj_ap_pm__str(),
 						pm.get_nbre_dj_progr_pm('AP'),
@@ -344,7 +345,8 @@ def consult_marche(_req, _m) :
 					'table' : True,
 					'table_header' : [
 						[
-							['Prestataires du lot', 'rowspan:4'],
+							['Numéro de lot', 'rowspan:4'],
+							['Prestataires', 'rowspan:4'],
 							['Nombre de demi-journées', 'colspan:9'],
 							['', 'rowspan:4'],
 							['', 'rowspan:4'],
@@ -377,6 +379,7 @@ def consult_marche(_req, _m) :
 				prest2 = {
 					'label' : 'Lot(s) du marché',
 					'value' : [[
+						pm.get_numero_lot(),
 						pm.get_prests(),
 						pm.get_nbre_dj_ani_pm__str(),
 						VPrestatairesMarche.objects.get(pk=pm.id).pm_pro_m,
@@ -396,15 +399,16 @@ def consult_marche(_req, _m) :
 					'table' : True,
 					'table_header' : [
 						[
-							['Prestataires du lot', 'rowspan:2'],
+							['Numéro de lot', 'rowspan:2'],
+							['Prestataires', 'rowspan:2'],
 							['Nombre de demi-journées pour les animations', 'colspan:4'],
 							['', 'rowspan:2'],
 							['', 'rowspan:2']
 						],
 						[
 							['Prévues', ''],
-							['Programmées (M)', ''],
-							['Programmées (C-T/S-T)', ''],
+							['Programmées (prestataire 1)', ''],
+							['Programmées (prestataire 2)', ''],
 							['Restantes', '']
 						]
 					]

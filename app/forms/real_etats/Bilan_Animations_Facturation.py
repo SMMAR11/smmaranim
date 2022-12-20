@@ -10,6 +10,11 @@ class Bilan_Animations_Facturation(forms.Form):
 
 	# Filtres
 
+	zl_presta = forms.ChoiceField(
+		choices=[EMPTY_VALUE],
+		label='Organisme'
+	)
+
 	zl_marche_lot = forms.ChoiceField(
 		choices=[EMPTY_VALUE], label='Lot'
 	)
@@ -23,6 +28,7 @@ class Bilan_Animations_Facturation(forms.Form):
 	def __init__(self, *args, **kwargs):
 
 		# Imports
+		from app.models import TOrganisme
 		from app.models import TPrestatairesMarche
 		from app.models import TUtilisateur
 
@@ -30,6 +36,11 @@ class Bilan_Animations_Facturation(forms.Form):
 		self.rq = kwargs.pop('kwarg_rq')
 
 		super().__init__(*args, **kwargs)
+
+		# Organismes sélectionnables
+		self.fields['zl_presta'].choices += [
+			(oOrg.pk, oOrg) for oOrg in TOrganisme.objects.all()
+		]
 
 		# Lots sélectionnables (tous si utilisateur SMMAR ou ceux
 		# concernant l'organisme de l'utilisateur connecté)
@@ -50,10 +61,12 @@ class Bilan_Animations_Facturation(forms.Form):
 		"""Récupération des données nettoyées du formulaire"""
 
 		# Imports
+		from app.models import TOrganisme
 		from datetime import datetime
 
 		# Clés
 		keys = [
+			'zl_presta',
 			'zl_marche_lot',
 			'zd_date_debut',
 			'zd_date_fin'
@@ -62,9 +75,18 @@ class Bilan_Animations_Facturation(forms.Form):
 		# Édition bilan
 		if self.rq.GET.get('action') == 'editer-bilan':
 			return {
+				'zl_presta': TOrganisme.objects.get(
+					pk=self.rq.GET.get('presta')
+				),
 				'zl_marche_lot': self.rq.GET.get('marcheLot'),
-				'zd_date_debut': datetime.strptime(self.rq.GET.get('marcheLotBilanPeriodeDu'), '%Y-%m-%d').date(),
-				'zd_date_fin': datetime.strptime(self.rq.GET.get('marcheLotBilanPeriodeAu'), '%Y-%m-%d').date()
+				'zd_date_debut': datetime.strptime(
+					self.rq.GET.get('marcheLotBilanPeriodeDu'),
+					'%Y-%m-%d'
+				).date(),
+				'zd_date_fin': datetime.strptime(
+					self.rq.GET.get('marcheLotBilanPeriodeAu'),
+					'%Y-%m-%d'
+				).date()
 			}
 
 		# Formulaire HTML
@@ -113,6 +135,7 @@ class Bilan_Animations_Facturation(forms.Form):
 
 		# Récupération des données nettoyées du formulaire
 		cleaned_data = self.__cleaned_data()
+		presta = cleaned_data['zl_presta']
 		marcheLot = cleaned_data['zl_marche_lot']
 		marcheLotBilanPeriodeDu = cleaned_data['zd_date_debut']
 		marcheLotBilanPeriodeAu = cleaned_data['zd_date_fin']
@@ -128,7 +151,7 @@ class Bilan_Animations_Facturation(forms.Form):
 				get_local_format(marcheLotBilanPeriodeDu),
 				get_local_format(marcheLotBilanPeriodeAu)
 			),
-			'MarcheLotPrestataire': oPm.get_prests_word()
+			'MarcheLotPrestataire': presta
 		}
 
 		# Pour chaque paragraphe du modèle Word, automatisation des
@@ -192,7 +215,7 @@ class Bilan_Animations_Facturation(forms.Form):
 
 				# Titre de l'animation
 				aniTitre = ' '.join([
-					oAni.get_dt_anim__str(), str(oAni)
+					'Le', oAni.get_dt_anim__str(), str(oAni)
 				])
 				oBil = None
 				if oAni.get_bilan__object():
@@ -224,6 +247,7 @@ class Bilan_Animations_Facturation(forms.Form):
 					paraNormal = insert_paragraph_after(documentStart)
 					paraNormal.style = document.styles['Corps texte - SMMAR']
 					paraNormal.add_run(oBil.get_themat_abord_ba())
+					paraNormal.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					documentStart = paraNormal
 
 					# Déroulement et méthodes adoptées
@@ -236,6 +260,7 @@ class Bilan_Animations_Facturation(forms.Form):
 						paraNormal = insert_paragraph_after(documentStart)
 						paraNormal.style = document.styles['Corps texte - SMMAR']
 						paraNormal.add_run(oBil.get_deroul_ba())
+						paraNormal.alignment = WD_ALIGN_PARAGRAPH.LEFT
 						documentStart = paraNormal
 
 					# Y a-t-il eu des activités en intérieur ?
@@ -274,6 +299,7 @@ class Bilan_Animations_Facturation(forms.Form):
 							documentStart = paraNormal
 
 					# Points négatifs de l'animation
+					'''
 					qsPN = oBil.get_point().exclude(comm_neg_point = '')
 					if qsPN.exists():
 						paraNormal = insert_paragraph_after(documentStart)
@@ -291,6 +317,7 @@ class Bilan_Animations_Facturation(forms.Form):
 								)
 							)
 							documentStart = paraNormal
+					'''
 
 					# Images
 					photos = []
@@ -305,8 +332,10 @@ class Bilan_Animations_Facturation(forms.Form):
 					for photo in photos:
 						try:
 							run.add_picture(photo, Mm(60))
+							run.add_text(' ')
 						except:
 							pass
+					para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					documentStart = para
 
 		# Suppression du paragraphe $START$
@@ -438,6 +467,7 @@ class Bilan_Animations_Facturation(forms.Form):
 					{}
 					{}
 					{}
+					{}
 					<button
 						class="center-block custom-button main-button"
 						type="submit"
@@ -447,6 +477,7 @@ class Bilan_Animations_Facturation(forms.Form):
 		</form>
 		'''.format(
 			csrf(self.rq)['csrf_token'],
+			form['zl_presta'],
 			form['zl_marche_lot'],
 			form['zd_date_debut'],
 			form['zd_date_fin']
@@ -458,6 +489,8 @@ class Bilan_Animations_Facturation(forms.Form):
 
 		# Imports
 		from app.models import TAnimation
+		from django.db.models import Q
+
 
 		# Initialisation des données
 		data = []
@@ -470,6 +503,7 @@ class Bilan_Animations_Facturation(forms.Form):
 
 			# Filtres
 			ands = {}
+			ands['id_projet__id_org'] = cleaned_data['zl_presta']
 			ands['id_projet__id_pm'] = cleaned_data['zl_marche_lot']
 			ands['dt_anim__gte'] = cleaned_data['zd_date_debut']
 			ands['dt_anim__lte'] = cleaned_data['zd_date_fin']

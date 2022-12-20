@@ -147,12 +147,10 @@ class GererPrestataireMarche(forms.ModelForm) :
 
 	# Champ
 	zl_prest = forms.ModelChoiceField(
-		label='Prestataire (mandataire)', queryset=None
+		label='Prestataire 1', queryset=None
 	)
 	zl_prest2 = forms.ModelChoiceField(
-		label='Prestataire (co-traitant ou sous-traitant)',
-		queryset=None,
-		required=False
+		label='Prestataire 2', queryset=None, required=False
 	)
 
 	class Meta :
@@ -160,7 +158,12 @@ class GererPrestataireMarche(forms.ModelForm) :
 		# Import
 		from app.models import TPrestatairesMarche
 
-		fields = ['nbre_dj_ap_pm', 'nbre_dj_pp_pm', 'nbre_dj_ani_pm']
+		fields = [
+			'numero_lot',
+			'nbre_dj_ap_pm',
+			'nbre_dj_pp_pm',
+			'nbre_dj_ani_pm'
+		]
 		model = TPrestatairesMarche
 
 	def __init__(self, *args, **kwargs) :
